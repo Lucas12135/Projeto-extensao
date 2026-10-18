@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONGs Parceiras - REUNE+</title>
+  <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <div class="brand"><img src="resource/logo.jpeg" alt="Ícone de mãos unidas" class="logo">
+            REUNE<b>+</b>
+        </div>
+        <nav class="nav-links">
+          <a href="index.html">Sobre nós</a>
+          <a href="ongs.html">ONGs Parceiras</a>
+          <a href="contato.html">Contato</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="ongs-section">
+        <div class="section-intro">
+          <h2>ONGs Parceiras</h2>
+          <p>Encontre organizações parceiras que trabalham por transformação social e conheça mais sobre suas iniciativas.</p>
+        </div>
+
+        <div class="search-filters">
+          <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Pesquisar ONGs..." class="search-input">
+          </div>
+          
+          <div class="filters-group">
+            <div class="filter-item">
+              <label for="distanceFilter">Distância (km):</label>
+              <select id="distanceFilter" class="filter-select">
+                <option value="">Todas</option>
+                <option value="5">Até 5 km</option>
+                <option value="10">Até 10 km</option>
+                <option value="25">Até 25 km</option>
+                <option value="50">Até 50 km</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="donationsFilter">Itens/Doações Aceitos:</label>
+              <select id="donationsFilter" class="filter-select">
+                <option value="">Todos os tipos</option>
+                <option value="alimentos">Alimentos</option>
+                <option value="roupas">Roupas</option>
+                <option value="livros">Livros</option>
+                <option value="higiene">Produtos de Higiene</option>
+                <option value="dinheiro">Doações em Dinheiro</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="sortFilter">Ordenar por:</label>
+              <select id="sortFilter" class="filter-select">
+                <option value="alfabetico">Alfabética (A-Z)</option>
+                <option value="alfabetico-desc">Alfabética (Z-A)</option>
+                <option value="distancia">Distância (Mais próximo)</option>
+              </select>
+            </div>
+
+            <button class="btn-reset">Limpar Filtros</button>
+          </div>
+        </div>
+
+        <div class="ongs-container">
+          <div class="ongs-list">
+            <div class="ong-card" data-nome="ONG ABC" data-distancia="3" data-doacoes="alimentos,roupas">
+              <img src="resource/logo.jpeg" alt="ONG ABC">
+              <div class="card-info">
+                <h4>ONG ABC</h4>
+                <p class="distance">3 km</p>
+                <p class="donations">Alimentos, Roupas</p>
+              </div>
+            </div>
+
+            <div class="ong-card" data-nome="Educar para Crescer" data-distancia="5" data-doacoes="livros,alimentos">
+              <img src="resource/logo.jpeg" alt="Educar para Crescer">
+              <div class="card-info">
+                <h4>Educar para Crescer</h4>
+                <p class="distance">5 km</p>
+                <p class="donations">Livros, Alimentos</p>
+              </div>
+            </div>
+
+            <div class="ong-card" data-nome="Saúde para Todos" data-distancia="8" data-doacoes="higiene,dinheiro">
+              <img src="resource/logo.jpeg" alt="Saúde para Todos">
+              <div class="card-info">
+                <h4>Saúde para Todos</h4>
+                <p class="distance">8 km</p>
+                <p class="donations">Higiene, Doações</p>
+              </div>
+            </div>
+
+            <div class="ong-card" data-nome="Bem-Vindo ao Lar" data-distancia="12" data-doacoes="roupas,higiene">
+              <img src="resource/logo.jpeg" alt="Bem-Vindo ao Lar">
+              <div class="card-info">
+                <h4>Bem-Vindo ao Lar</h4>
+                <p class="distance">12 km</p>
+                <p class="donations">Roupas, Higiene</p>
+              </div>
+            </div>
+
+            <div class="ong-card" data-nome="Juntos Somos Fortes" data-distancia="15" data-doacoes="alimentos,livros,dinheiro">
+              <img src="resource/logo.jpeg" alt="Juntos Somos Fortes">
+              <div class="card-info">
+                <h4>Juntos Somos Fortes</h4>
+                <p class="distance">15 km</p>
+                <p class="donations">Alimentos, Livros, Doações</p>
+              </div>
+            </div>
+
+            <div class="ong-card" data-nome="Futuro Melhor" data-distancia="7" data-doacoes="livros,higiene">
+              <img src="resource/logo.jpeg" alt="Futuro Melhor">
+              <div class="card-info">
+                <h4>Futuro Melhor</h4>
+                <p class="distance">7 km</p>
+                <p class="donations">Livros, Higiene</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ong-details">
+            <div class="details-placeholder">
+              <p>Selecione uma ONG para ver mais detalhes</p>
+            </div>
+            <div id="detailsContent" class="details-content" style="display: none;">
+              <div class="details-header">
+                <img id="detailsImage" src="" alt="">
+                <div class="details-title">
+                  <h2 id="detailsName"></h2>
+                </div>
+              </div>
+
+              <div class="details-body">
+                <div class="detail-section">
+                  <h3>Localização</h3>
+                  <p id="detailsDistance"></p>
+                </div>
+
+                <div class="detail-section">
+                  <h3>Doações Aceitas</h3>
+                  <p id="detailsDonations"></p>
+                </div>
+
+                <div class="detail-section">
+                  <h3>Sobre</h3>
+                  <p id="detailsAbout"></p>
+                </div>
+
+                <div class="detail-section">
+                  <h3>Missão</h3>
+                  <p id="detailsMission"></p>
+                </div>
+
+                <div class="detail-section">
+                  <h3>Projetos Ativos</h3>
+                  <ul id="detailsProjects"></ul>
+                </div>
+
+                <div class="detail-section">
+                  <h3>Contato</h3>
+                  <p id="detailsContact"></p>
+                  <p id="detailsPhone"></p>
+                  <p id="detailsEmail"></p>
+                </div>
+
+                <a href="login.html" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">Apoiar esta ONG</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 REUNE+. Juntos pela transformação social.</p>
+  </footer>
+    <script src="script.js"></script>
+</body>
+</html>
