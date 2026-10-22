@@ -9,14 +9,14 @@
 </head>
 <body class="signup-page">
   <main>
-    <a href="index.html" class="btn-back">Voltar</a>
+    <a href="index.php" class="btn-back">Voltar</a>
     <div class="signup-container">
       <div class="signup-content">
 
         <div class="signup-info">
           <h2>Já possui uma conta?</h2>
           <p>Acesse sua conta e continue ajudando a transformar comunidades</p>
-          <button class="btn-login-alt" onclick="window.location.href='login.html'">Fazer Login</button>
+          <button class="btn-login-alt" onclick="window.location.href='login.php'">Fazer Login</button>
         </div>
 
         <div class="signup-form-section">

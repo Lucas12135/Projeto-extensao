@@ -15,9 +15,9 @@
             REUNE<b>+</b>
         </div>
         <nav class="nav-links">
-          <a href="index.html">Sobre nós</a>
-          <a href="ongs.html">ONGs Parceiras</a>
-          <a href="contato.html">Contato</a>
+          <a href="index.php">Sobre nós</a>
+          <a href="ongs.php">ONGs Parceiras</a>
+          <a href="contato.php">Contato</a>
         </nav>
       </div>
     </div>
@@ -175,7 +175,7 @@
                   <p id="detailsEmail"></p>
                 </div>
 
-                <a href="login.html" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">Apoiar esta ONG</a>
+                <a href="login.php" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">Apoiar esta ONG</a>
               </div>
             </div>
           </div>

@@ -15,8 +15,8 @@
             REUNE<b>+</b>
         </div>
         <nav class="nav-links">
-          <a href="index.html">Sobre nós</a>
-          <a href="ongs.html">ONGs Parceiras</a>
+          <a href="index.php">Sobre nós</a>
+          <a href="ongs.php">ONGs Parceiras</a>
           <a href="#contato">Contato</a>
         </nav>
       </div>

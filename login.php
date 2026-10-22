@@ -9,14 +9,14 @@
 </head>
 <body class="login-page">
   <main>
-    <a href="index.html" class="btn-back">Voltar</a>
+    <a href="index.php" class="btn-back">Voltar</a>
     <div class="login-container">
       <div class="login-content">
 
         <div class="login-signup">
           <h2>Não possui uma conta?</h2>
           <p>Cadastre-se e comece a fazer parte da comunidade REUNE+</p>
-          <a href="cadastro.html">
+          <a href="cadastro.php">
             <button class="btn-signup">Cadastre-se</button>
           </a>
         </div>

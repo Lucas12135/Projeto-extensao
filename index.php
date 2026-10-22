@@ -1,3 +1,6 @@
+<?php
+require_once "./BD/criarTabelas.php";
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -16,8 +19,8 @@
         </div>
         <nav class="nav-links">
           <a href="#sobre">Sobre nós</a>
-          <a href="ongs.html">ONGs Parceiras</a>
-          <a href="contato.html">Contato</a>
+          <a href="ongs.php">ONGs Parceiras</a>
+          <a href="contato.php">Contato</a>
         </nav>
       </div>
 
@@ -27,8 +30,8 @@
           <h1>Uma plataforma digital para facilitar a doação e distribuição de alimentos.</h1>
           <p>O Reune+ é uma plataforma centralizadora que conecta doadores, voluntários e organizações beneficentes, tornando o processo de arrecadação e doação mais organizado, acessível e eficiente.</p>
           <div class="buttons">
-            <a class="btn btn-primary" href="login.html">Comece a ajudar</a>
-            <a class="btn btn-secondary" href="ongs.html">Conheça as ONGs parceiras</a>
+            <a class="btn btn-primary" href="login.php">Comece a ajudar</a>
+            <a class="btn btn-secondary" href="ongs.php">Conheça as ONGs parceiras</a>
           </div>
         </div>
 
