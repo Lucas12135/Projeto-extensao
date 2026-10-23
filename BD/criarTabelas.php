@@ -7,7 +7,8 @@ $tabelas = [
     nm_ong VARCHAR(30) NOT NULL,
     cd_cnpj DECIMAL(14,0),
     nm_email_ong VARCHAR(50),
-    cd_telefone_ong DECIMAL(13,0)
+    cd_telefone_ong DECIMAL(13,0),
+    pw_ong VARCHAR(255)
 )",
 
     "CREATE TABLE IF NOT EXISTS DOADOR (
@@ -15,7 +16,8 @@ $tabelas = [
     nm_doador VARCHAR(50) NOT NULL,
     cd_cpf_doador DECIMAL(11,0),
     nm_email_doador VARCHAR(50),
-    cd_telefone_doador DECIMAL(13,0)
+    cd_telefone_doador DECIMAL(13,0),
+    pw_doador VARCHAR(255)
 )",
 
     "CREATE TABLE IF NOT EXISTS TRANSPORTADORA (

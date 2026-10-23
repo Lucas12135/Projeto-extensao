@@ -1,3 +1,45 @@
+<?php 
+  require_once __DIR__ .  "/BD/conexao.php";
+  session_start();
+  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $emailDoador = isset($_POST['email-doador']) ? $_POST['email-doador'] : null;
+    $senhaDoador = isset($_POST['senha-doador']) ? $_POST['senha-doador'] : null;
+
+    $emailOng = isset($_POST['email-ong']) ? $_POST['email-ong'] : null;
+    $senhaOng = isset($_POST['senha-ong']) ? $_POST['senha-ong'] : null;
+    $telefoneOng = isset($_POST['telefone-ong']) ? $_POST['telefone-ong'] : null;
+
+    if($emailOng == null) {
+      $smnt=$conexao->prepare("SELECT * FROM DOADOR WHERE nm_email_doador = :email");
+      $smnt->bindParam(":email", $emailDoador);
+      $smnt->execute();
+      $usuario = $smnt->fetch(PDO::FETCH_ASSOC);
+
+      if (password_verify($senhaDoador, $usuario['pw_doador'])) {
+        $_SESSION['usuario_email'] = $usuario['email-doador'];
+        header("Location: index.php");
+      } else {
+        echo "E-mail ou senha incorretos.";
+      }
+      
+    } else {
+      $$smnt=$conexao->prepare("SELECT * FROM ONG WHERE nm_email_ong = :email");
+      $smnt->bindParam(":email", $emailOng);
+      $smnt->execute();
+      $usuario = $smnt->fetch(PDO::FETCH_ASSOC);
+
+      if (password_verify($senhaOng, $usuario['pw_ong'])) {
+        $_SESSION['usuario_email'] = $usuario['email-ong'];
+        header("Location: index.php");
+      } else {
+        echo "E-mail ou senha incorretos.";
+      }
+    }
+    $conexao = null;
+  }
+  
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -30,15 +72,15 @@
             <button class="tab-button" onclick="trocarAba('ong')">ONG</button>
           </div>
 
-          <form class="login-form active" id="form-doador">
+          <form class="login-form active" id="form-doador" action="#" method="POST">
             <div class="form-group">
               <label for="email-doador">Email</label>
-              <input type="email" id="email-doador" name="email" placeholder="seu@email.com" required>
+              <input type="email" id="email-doador" name="email-doador" placeholder="seu@email.com" required>
             </div>
 
             <div class="form-group">
               <label for="password-doador">Senha</label>
-              <input type="password" id="password-doador" name="password" placeholder="••••••••" required>
+              <input type="password" id="password-doador" name="senha-doador" placeholder="••••••••" required>
             </div>
 
             <div class="form-actions">
@@ -52,15 +94,15 @@
             <button type="submit" class="btn-login">Entrar como Doador</button>
           </form>
 
-          <form class="login-form" id="form-ong">
+          <form class="login-form" id="form-ong" action="#" method="POST">
             <div class="form-group">
               <label for="email-ong">Email</label>
-              <input type="email" id="email-ong" name="email" placeholder="contato@ong.com.br" required>
+              <input type="email" id="email-ong" name="email-ong" placeholder="contato@ong.com.br" required>
             </div>
 
             <div class="form-group">
               <label for="password-ong">Senha</label>
-              <input type="password" id="password-ong" name="password" placeholder="••••••••" required>
+              <input type="password" id="password-ong" name="senha-ong" placeholder="••••••••" required>
             </div>
 
             <div class="form-actions">
