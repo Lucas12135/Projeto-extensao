@@ -7,10 +7,9 @@
 
     $emailOng = isset($_POST['email-ong']) ? $_POST['email-ong'] : null;
     $senhaOng = isset($_POST['senha-ong']) ? $_POST['senha-ong'] : null;
-    $telefoneOng = isset($_POST['telefone-ong']) ? $_POST['telefone-ong'] : null;
-
+    
     if($emailOng == null) {
-      $smnt=$conexao->prepare("SELECT * FROM DOADOR WHERE nm_email_doador = :email");
+      $smnt=$conexao->prepare("SELECT pw_doador FROM DOADOR WHERE nm_email_doador = :email");
       $smnt->bindParam(":email", $emailDoador);
       $smnt->execute();
       $usuario = $smnt->fetch(PDO::FETCH_ASSOC);
@@ -23,7 +22,7 @@
       }
       
     } else {
-      $$smnt=$conexao->prepare("SELECT * FROM ONG WHERE nm_email_ong = :email");
+      $smnt=$conexao->prepare("SELECT pw_ong FROM ONG WHERE nm_email_ong = :email");
       $smnt->bindParam(":email", $emailOng);
       $smnt->execute();
       $usuario = $smnt->fetch(PDO::FETCH_ASSOC);

@@ -1,179 +1,71 @@
-const dadosOngs = {
-  'ONG ABC': {
-    distancia: '3 km',
-    doacoes: 'Alimentos, Roupas',
-    sobre: 'Organização focada em ações comunitárias diretas para famílias em situação de vulnerabilidade.',
-    missao: 'Promover inclusão social e dignidade através de ações solidárias e apoio comunitário contínuo.',
-    projetos: ['Distribuição de Alimentos', 'Coleta de Roupas', 'Atendimento Familiar'],
-    localizacao: 'Caiçara - Praia Grande',
-    telefone: '(11) 3456-7890',
-    email: 'contato@acaocomunitaria.org'
-  },
-  'Educar para Crescer': {
-    distancia: '5 km',
-    doacoes: 'Livros, Alimentos',
-    sobre: 'Dedicada à educação infantil e reforço escolar para crianças de baixa renda.',
-    missao: 'Garantir oportunidades de aprendizado e desenvolvimento pessoal para crianças e adolescentes.',
-    projetos: ['Reforço Escolar', 'Biblioteca Comunitária', 'Oficinas de Capacitação'],
-    localizacao: 'Jardim Real - Praia Grande',
-    telefone: '(11) 3456-7891',
-    email: 'contato@educarparacrescer.org'
-  },
-  'Saúde para Todos': {
-    distancia: '8 km',
-    doacoes: 'Higiene, Doações',
-    sobre: 'Oferece atendimento de saúde básico e campanhas de prevenção em comunidades carentes.',
-    missao: 'Democratizar o acesso à saúde e bem-estar com ações de prevenção e orientação.',
-    projetos: ['Campanhas de Vacinação', 'Atendimento Médico', 'Oficinas de Saúde'],
-    localizacao: 'Samambaia - Praia Grande',
-    telefone: '(11) 3456-7892',
-    email: 'contato@saudepatodos.org'
-  },
-  'Bem-Vindo ao Lar': {
-    distancia: '12 km',
-    doacoes: 'Roupas, Higiene',
-    sobre: 'Programa de acolhimento para pessoas em situação de rua com apoio integral.',
-    missao: 'Oferecer acolhimento digno e apoio psicossocial para pessoas sem moradia.',
-    projetos: ['Acolhimento Noturno', 'Higiene Pessoal', 'Reintegração Social'],
-    localizacao: 'Boqueirão - Praia Grande',
-    telefone: '(11) 3456-7893',
-    email: 'contato@bemvindoaoar.org'
-  },
-  'Juntos Somos Fortes': {
-    distancia: '15 km',
-    doacoes: 'Alimentos, Livros, Doações',
-    sobre: 'Rede colaborativa de voluntários que trabalha múltiplas frentes de assistência social.',
-    missao: 'Mobilizar a comunidade para transformação social através de trabalho colaborativo.',
-    projetos: ['Alimentação Solidária', 'Educação Infantil', 'Treinamento Profissional'],
-    localizacao: 'Ocian - Praia Grande',
-    telefone: '(11) 3456-7894',
-    email: 'contato@juntossomofortes.org'
-  },
-  'Futuro Melhor': {
-    distancia: '7 km',
-    doacoes: 'Livros, Higiene',
-    sobre: 'Iniciativa focada em preparar jovens para o mercado de trabalho e desenvolvimento pessoal.',
-    missao: 'Criar oportunidades de emprego e autonomia para jovens em comunidades carentes.',
-    projetos: ['Cursos Profissionalizantes', 'Mentoria Profissional', 'Inserção no Mercado'],
-    localizacao: 'Solemar - Praia Grande',
-    telefone: '(11) 3456-7895',
-    email: 'contato@futuromelhor.org'
+const ongsList = document.getElementById('ongsList');
+
+if (ongsList) {
+  const searchInput = document.getElementById('searchInput');
+  const sortFilter = document.getElementById('sortFilter');
+  const cards = Array.from(ongsList.querySelectorAll('.ong-card'));
+  const details = document.getElementById('ongDetails');
+
+  function showOng(card) {
+    cards.forEach(item => {
+      const selected = item === card;
+      item.classList.toggle('active', selected);
+      item.setAttribute('aria-pressed', selected);
+    });
+
+    document.getElementById('detailsName').textContent = card.dataset.nome;
+    document.getElementById('detailsLocation').textContent = card.dataset.localizacao || 'Não informada';
+    document.getElementById('detailsDistance').textContent = card.dataset.distancia
+      ? `${card.dataset.distancia} km`
+      : 'Distância não informada';
+    document.getElementById('detailsDonations').textContent = card.dataset.doacoes || 'Não informado';
+    document.getElementById('detailsAbout').textContent = card.dataset.sobre || 'Não informado';
+    document.getElementById('detailsMission').textContent = card.dataset.missao || 'Não informada';
+    document.getElementById('detailsProjects').textContent = card.dataset.projetos || 'Não informados';
+    document.getElementById('detailsPhone').textContent = card.dataset.telefone || 'Telefone não informado';
+    document.getElementById('detailsEmail').textContent = card.dataset.email || 'E-mail não informado';
   }
-};
-    
-    document.querySelectorAll('.ong-card').forEach(cartao => {
-      cartao.addEventListener('click', function() {
-        const nome = this.dataset.nome;
-        
-        const dados = dadosOngs[nome];
 
-        document.querySelectorAll('.ong-card').forEach(c => c.classList.remove('active'));
-        
-        this.classList.add('active');
+  cards.forEach(card => {
+    card.addEventListener('click', () => showOng(card));
+  });
 
-        document.querySelector('.details-placeholder').style.display = 'none';
-        
-        document.getElementById('detailsContent').style.display = 'block';
+  function filterOngs() {
+    const search = searchInput.value.trim().toLocaleLowerCase('pt-BR');
 
-        document.getElementById('detailsImage').src = 'resource/logo.jpeg';
-        document.getElementById('detailsImage').alt = nome;
-        document.getElementById('detailsName').textContent = nome;
-        document.getElementById('detailsDistance').textContent = `${dados.distancia}`;
-        document.getElementById('detailsDonations').textContent = dados.doacoes;
-        document.getElementById('detailsAbout').textContent = dados.sobre;
-        document.getElementById('detailsMission').textContent = dados.missao;
-        document.getElementById('detailsContact').textContent = dados.localizacao;
-        document.getElementById('detailsPhone').innerHTML = `<strong>Telefone:</strong> <a href="">${dados.telefone}</a>`;
-        document.getElementById('detailsEmail').innerHTML = `<strong>Email:</strong> <a href="">${dados.email}</a>`;
-
-        const listaProjetos = document.getElementById('detailsProjects');
-        
-        listaProjetos.innerHTML = '';
-        
-        dados.projetos.forEach(projeto => {
-          const item = document.createElement('li');
-          item.textContent = projeto;
-          listaProjetos.appendChild(item);
-        });
-      });
+    cards.forEach(card => {
+      const name = card.dataset.nome.toLocaleLowerCase('pt-BR');
+      card.style.display = name.includes(search) ? 'flex' : 'none';
     });
 
-    document.getElementById('searchInput').addEventListener('input', function() {
-      const termoPesquisa = this.value.toLowerCase();
-      
-      document.querySelectorAll('.ong-card').forEach(cartao => {
-        const nome = cartao.dataset.nome.toLowerCase();
-        
-        cartao.style.display = nome.includes(termoPesquisa) ? 'flex' : 'none';
-      });
+    const visibleCard = cards.find(card => card.style.display !== 'none');
+    const selectedCard = cards.find(card => card.classList.contains('active'));
+    if (visibleCard && selectedCard.style.display === 'none') {
+      showOng(visibleCard);
+    }
+
+    details.style.display = visibleCard ? 'block' : 'none';
+  }
+
+  function sortOngs() {
+    cards.sort((a, b) => {
+      const comparison = a.dataset.nome.localeCompare(b.dataset.nome, 'pt-BR');
+      return sortFilter.value === 'alfabetico-desc' ? -comparison : comparison;
     });
 
+    cards.forEach(card => ongsList.appendChild(card));
+  }
 
-    document.getElementById('distanceFilter').addEventListener('change', function() {
-      const distanciaMaxima = this.value;
-      
-      document.querySelectorAll('.ong-card').forEach(cartao => {
-        if (!distanciaMaxima) {
-          cartao.style.display = 'flex';
-        } else {
-          const distancia = parseInt(cartao.dataset.distancia);
-          cartao.style.display = distancia <= distanciaMaxima ? 'flex' : 'none';
-        }
-      });
-    });
+  searchInput.addEventListener('input', filterOngs);
+  sortFilter.addEventListener('change', sortOngs);
 
-    document.getElementById('donationsFilter').addEventListener('change', function() {
-      const tipoSelecionado = this.value;
-      
-      document.querySelectorAll('.ong-card').forEach(cartao => {
-        if (!tipoSelecionado) {
-          cartao.style.display = 'flex';
-        } else {
-          const doacoes = cartao.dataset.doacoes;
-          cartao.style.display = doacoes.includes(tipoSelecionado) ? 'flex' : 'none';
-        }
-      });
-    });
-
-    document.getElementById('sortFilter').addEventListener('change', function() {
-      const tipoOrdenacao = this.value;
-      
-      const contenedor = document.querySelector('.ongs-list');
-      
-      const cartoes = Array.from(document.querySelectorAll('.ong-card'));
-
-      cartoes.sort((a, b) => {
-        switch(tipoOrdenacao) {
-          case 'alfabetico':
-            return a.dataset.nome.localeCompare(b.dataset.nome);
-
-          case 'alfabetico-desc':
-            return b.dataset.nome.localeCompare(a.dataset.nome);
-
-          case 'distancia':
-            return parseInt(a.dataset.distancia) - parseInt(b.dataset.distancia);
-
-          default:
-            return 0;
-        }
-      });
-
-      cartoes.forEach(cartao => contenedor.appendChild(cartao));
-    });
-
-    document.querySelector('.btn-reset').addEventListener('click', function() {
-      document.getElementById('searchInput').value = '';
-      
-      document.getElementById('distanceFilter').value = '';
-      
-      document.getElementById('donationsFilter').value = '';
-
-      document.getElementById('sortFilter').value = 'alfabetico';
-      
-      document.querySelectorAll('.ong-card').forEach(cartao => {
-        cartao.style.display = 'flex';
-      });
-    });
+  document.querySelector('.btn-reset').addEventListener('click', function() {
+    searchInput.value = '';
+    sortFilter.value = 'alfabetico';
+    sortOngs();
+    filterOngs();
+  });
+}
 
 
 function trocarAba(tab) {
@@ -185,30 +77,59 @@ function trocarAba(tab) {
 }
 
 
-function trocarAbaCadastro(tab) {
+function trocarAbaCadastro(tab, botao) {
   document.querySelectorAll('.signup-tabs .tab-button').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.signup-form').forEach(form => form.classList.remove('active'));
 
-  event.target.classList.add('active');
+  botao.classList.add('active');
   document.getElementById(`form-signup-${tab}`).classList.add('active');
 }
 
-  document.getElementById('form-signup-doador').addEventListener('submit', function(e) {
-    const senha = document.getElementById('senha-doador').value;
-    const confirmarSenha = document.getElementById('confirmar-senha-doador').value;
-    
-    if (senha !== confirmarSenha) {
+const ongForm = document.getElementById('form-signup-ong');
+
+if (ongForm) {
+  const ongStep1 = document.getElementById('ong-step-1');
+  const ongStep2 = document.getElementById('ong-step-2');
+  const stepLabel = document.getElementById('ong-step-label');
+
+  document.getElementById('ong-next-step').addEventListener('click', function() {
+    if (!ongStep1.reportValidity()) {
+      return;
+    }
+
+    const passwords = ongStep1.querySelectorAll('input[type="password"]');
+    if (passwords[0].value !== passwords[1].value) {
       alert('As senhas não conferem!');
       return;
     }
+
+    ongStep1.disabled = true;
+    ongStep1.hidden = true;
+    ongStep2.disabled = false;
+    ongStep2.hidden = false;
+    stepLabel.textContent = 'Etapa 2 de 2: Informações da ONG';
   });
 
-  document.getElementById('form-signup-ong').addEventListener('submit', function(e) {
-    const senha = document.getElementById('senha-ong').value;
-    const confirmarSenha = document.getElementById('confirmar-senha-ong').value;
-    
-    if (senha !== confirmarSenha) {
+  document.getElementById('ong-previous-step').addEventListener('click', function() {
+    ongStep2.disabled = true;
+    ongStep2.hidden = true;
+    ongStep1.disabled = false;
+    ongStep1.hidden = false;
+    stepLabel.textContent = 'Etapa 1 de 2: Dados da ONG';
+  });
+
+  ongForm.addEventListener('submit', function() {
+    ongStep1.disabled = false;
+  });
+}
+
+document.querySelectorAll('.signup-form').forEach(form => {
+  form.addEventListener('submit', function(e) {
+    const senhas = form.querySelectorAll('input[type="password"]');
+
+    if (senhas[0].value !== senhas[1].value) {
+      e.preventDefault();
       alert('As senhas não conferem!');
-      return;
     }
   });
+});

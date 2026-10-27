@@ -1,5 +1,6 @@
 <?php
-require_once "./BD/criarTabelas.php";
+require_once __DIR__ .  "/BD/conexao.php";
+require_once __DIR__ . "/BD/criarTabelas.php";
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">

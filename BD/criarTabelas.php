@@ -7,8 +7,14 @@ $tabelas = [
     nm_ong VARCHAR(30) NOT NULL,
     cd_cnpj DECIMAL(14,0),
     nm_email_ong VARCHAR(50),
-    cd_telefone_ong DECIMAL(13,0),
-    pw_ong VARCHAR(255)
+    cd_telefone_ong VARCHAR(20),
+    pw_ong VARCHAR(255),
+    cd_distancia_km DECIMAL(8,2),
+    ds_doacoes TEXT,
+    ds_sobre TEXT,
+    ds_missao TEXT,
+    ds_projetos TEXT,
+    ds_localizacao VARCHAR(255)
 )",
 
     "CREATE TABLE IF NOT EXISTS DOADOR (
