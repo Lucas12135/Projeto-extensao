@@ -5,7 +5,8 @@ $tabelas = [
     "CREATE TABLE IF NOT EXISTS ONG (
     id_ONG INT AUTO_INCREMENT PRIMARY KEY,
     nm_ong VARCHAR(30) NOT NULL,
-    cd_cnpj DECIMAL(14,0),
+    cd_cnpj VARCHAR(18),
+    ds_documento_ong VARCHAR(255),
     nm_email_ong VARCHAR(50),
     cd_telefone_ong VARCHAR(20),
     pw_ong VARCHAR(255),
@@ -20,9 +21,10 @@ $tabelas = [
     "CREATE TABLE IF NOT EXISTS DOADOR (
     id_Doador INT AUTO_INCREMENT PRIMARY KEY,
     nm_doador VARCHAR(50) NOT NULL,
-    cd_cpf_doador DECIMAL(11,0),
+    cd_cpf_doador VARCHAR(14),
     nm_email_doador VARCHAR(50),
-    cd_telefone_doador DECIMAL(13,0),
+    cd_telefone_doador VARCHAR(20),
+    ds_endereco_doador VARCHAR(255),
     pw_doador VARCHAR(255)
 )",
 
@@ -66,3 +68,4 @@ $tabelas = [
 foreach ($tabelas as $sql) {
     $conexao->exec($sql);
 }
+?>
