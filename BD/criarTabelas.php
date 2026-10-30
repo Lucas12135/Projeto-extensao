@@ -15,7 +15,8 @@ $tabelas = [
     ds_sobre TEXT,
     ds_missao TEXT,
     ds_projetos TEXT,
-    ds_localizacao VARCHAR(255)
+    ds_localizacao VARCHAR(255),
+    nm_imagem_ong VARCHAR(255)
 )",
 
     "CREATE TABLE IF NOT EXISTS DOADOR (
@@ -25,7 +26,8 @@ $tabelas = [
     nm_email_doador VARCHAR(50),
     cd_telefone_doador VARCHAR(20),
     ds_endereco_doador VARCHAR(255),
-    pw_doador VARCHAR(255)
+    pw_doador VARCHAR(255),
+    nm_imagem_doador VARCHAR(255)
 )",
 
     "CREATE TABLE IF NOT EXISTS TRANSPORTADORA (
@@ -67,5 +69,17 @@ $tabelas = [
 
 foreach ($tabelas as $sql) {
     $conexao->exec($sql);
+}
+
+$colunasImagem = [
+    'ONG'    => 'nm_imagem_ong',
+    'DOADOR' => 'nm_imagem_doador',
+];
+
+foreach ($colunasImagem as $tabela => $coluna) {
+    $colunasExistentes = $conexao->query("SHOW COLUMNS FROM `$tabela`")->fetchAll(PDO::FETCH_COLUMN);
+    if (!in_array($coluna, $colunasExistentes, true)) {
+        $conexao->exec("ALTER TABLE `$tabela` ADD COLUMN `$coluna` VARCHAR(255)");
+    }
 }
 ?>

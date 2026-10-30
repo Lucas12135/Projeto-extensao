@@ -2,7 +2,7 @@
 require_once __DIR__ . "/BD/conexao.php";
 $smnt = $conexao->prepare(
   "SELECT nm_ong, nm_email_ong, cd_telefone_ong, cd_distancia_km,
-          ds_doacoes, ds_sobre, ds_missao, ds_projetos, ds_localizacao
+          ds_doacoes, ds_sobre, ds_missao, ds_projetos, ds_localizacao, nm_imagem_ong
    FROM ONG
    ORDER BY nm_ong"
 );
@@ -74,11 +74,13 @@ $escapar = static function ($valor) {
                   $nome = $escapar($ong['nm_ong']);
                   $distancia = $ong['cd_distancia_km'] ?? '';
                   $doacoes = $ong['ds_doacoes'] ?? '';
+                  $imagem = $ong['nm_imagem_ong'] ?: 'resource/logo.jpeg';
                 ?>
                 <button
                   type="button"
                   class="ong-card<?= $indice === 0 ? ' active' : '' ?>"
                   data-nome="<?= $nome ?>"
+                  data-imagem="<?= $escapar($imagem) ?>"
                   data-distancia="<?= $escapar($distancia) ?>"
                   data-doacoes="<?= $escapar($doacoes) ?>"
                   data-sobre="<?= $escapar($ong['ds_sobre']) ?>"
@@ -89,7 +91,7 @@ $escapar = static function ($valor) {
                   data-email="<?= $escapar($ong['nm_email_ong']) ?>"
                   aria-pressed="<?= $indice === 0 ? 'true' : 'false' ?>"
                 >
-                  <img src="resource/logo.jpeg" alt="Logo da ONG">
+                  <img src="<?= $escapar($imagem) ?>" alt="Logo da ONG">
                   <div class="card-info">
                     <h4><?= $nome ?></h4>
                     <p class="distance"><?= $distancia !== '' ? $escapar($distancia) . ' km' : 'Distância não informada' ?></p>
@@ -102,8 +104,9 @@ $escapar = static function ($valor) {
 
           <section class="ong-details" id="ongDetails" aria-live="polite">
             <?php if ($ongSelecionada): ?>
+              <?php $imagemSelecionada = $ongSelecionada['nm_imagem_ong'] ?: 'resource/logo.jpeg'; ?>
               <div class="details-header">
-                <img src="resource/logo.jpeg" alt="Logo da ONG">
+                <img id="detailsImage" src="<?= $escapar($imagemSelecionada) ?>" alt="Logo da ONG">
                 <div class="details-title">
                   <h2 id="detailsName"><?= $escapar($ongSelecionada['nm_ong']) ?></h2>
                 </div>

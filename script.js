@@ -14,6 +14,7 @@ if (ongsList) {
     });
 
     document.getElementById('detailsName').textContent = card.dataset.nome;
+    document.getElementById('detailsImage').src = card.dataset.imagem;
     document.getElementById('detailsLocation').textContent = card.dataset.localizacao || 'Não informada';
     document.getElementById('detailsDistance').textContent = card.dataset.distancia
       ? `${card.dataset.distancia} km`

@@ -7,16 +7,17 @@ function cadastrarOng(PDO $conexao, array $dados): array
     ];
     foreach ($obrigatorios as $campo) {
         if (empty($dados[$campo])) {
-            return ['sucesso' => false, 'mensagem' => "Campo obrigatório ausente: $campo", 'id' => null];
+           return ['sucesso' => false, 'mensagem' => "Campo obrigatório ausente: $campo", 'id' => null];
         }
     }
 
     $sql = "INSERT INTO ONG
                 (nm_ong, cd_cnpj, ds_documento_ong, nm_email_ong, cd_telefone_ong, pw_ong,
-                 cd_distancia_km, ds_doacoes, ds_sobre, ds_missao, ds_projetos, ds_localizacao)
+                 cd_distancia_km, ds_doacoes, ds_sobre, ds_missao, ds_projetos, ds_localizacao,
+                 nm_imagem_ong)
             VALUES
                 (:nome, :cnpj, :documento, :email, :telefone, :senha,
-                 :distancia, :doacoes, :sobre, :missao, :projetos, :localizacao)";
+                 :distancia, :doacoes, :sobre, :missao, :projetos, :localizacao, :imagem)";
 
     try {
         $stmt = $conexao->prepare($sql);
@@ -33,6 +34,7 @@ function cadastrarOng(PDO $conexao, array $dados): array
             ':missao'      => $dados['missao']      ?? null,
             ':projetos'    => $dados['projetos']    ?? null,
             ':localizacao' => $dados['localizacao'] ?? null,
+            ':imagem'      => $dados['imagem']      ?? null,
         ]);
 
         return [

@@ -9,9 +9,9 @@ function cadastrarDoador(PDO $conexao, array $dados): array
     }
 
     $sql = "INSERT INTO DOADOR
-                (nm_doador, cd_cpf_doador, nm_email_doador, cd_telefone_doador, ds_endereco_doador, pw_doador)
+                (nm_doador, cd_cpf_doador, nm_email_doador, cd_telefone_doador, ds_endereco_doador, pw_doador, nm_imagem_doador)
             VALUES
-                (:nome, :cpf, :email, :telefone, :endereco, :senha)";
+                (:nome, :cpf, :email, :telefone, :endereco, :senha, :imagem)";
 
     try {
         $stmt = $conexao->prepare($sql);
@@ -22,6 +22,7 @@ function cadastrarDoador(PDO $conexao, array $dados): array
             ':telefone' => $dados['telefone'],
             ':endereco' => $dados['endereco'] ?? null,
             ':senha'    => password_hash($dados['senha'], PASSWORD_DEFAULT),
+            ':imagem'   => $dados['imagem'] ?? null,
         ]);
 
         return [

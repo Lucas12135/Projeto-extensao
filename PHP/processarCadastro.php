@@ -2,6 +2,7 @@
 require_once __DIR__ . "/../BD/conexao.php";
 require_once __DIR__ . "/cadastrarOng.php";
 require_once __DIR__ . "/cadastrarDoador.php";
+require_once __DIR__ . "/uploadImagem.php";
 
 function campo(string $nome, $default = null)
 {
@@ -29,14 +30,25 @@ function processarCadastro(PDO $conexao): ?array
             'sobre'       => campo('sobre-ong'),
             'missao'      => campo('missao-ong'),
             'projetos'    => campo('projetos-ong'),
-            'localizacao' => campo('localizacao-ong'),
+            'localizacao' => campo('localizacao-ong')
         ];
 
         if ($dados['senha'] !== campo('confirmar-senha') || campo('agreement') === null) {
             return ['sucesso' => false, 'mensagem' => 'Confirme a senha e aceite os termos.', 'id' => null];
         }
 
-        return cadastrarOng($conexao, $dados);
+        $upload = salvarImagemCadastro($_FILES['imagem-ong'] ?? null, true);
+        if (!$upload['sucesso']) {
+            return ['sucesso' => false, 'mensagem' => $upload['mensagem'], 'id' => null];
+        }
+
+        $dados['imagem'] = $upload['caminho'];
+        $resultado = cadastrarOng($conexao, $dados);
+        if (!$resultado['sucesso']) {
+            removerImagemCadastro($upload['arquivo']);
+        }
+
+        return $resultado;
     }
 
     if ($tipo !== 'doador') {
@@ -49,14 +61,25 @@ function processarCadastro(PDO $conexao): ?array
         'email'    => campo('email-doador'),
         'telefone' => campo('telefone-doador'),
         'endereco' => campo('endereco-doador'),
-        'senha'    => campo('senha-doador'),
+        'senha'    => campo('senha-doador')
     ];
 
     if ($dados['senha'] !== campo('confirmar-senha') || campo('agreement') === null) {
         return ['sucesso' => false, 'mensagem' => 'Confirme a senha e aceite os termos.', 'id' => null];
     }
 
-    return cadastrarDoador($conexao, $dados);
+    $upload = salvarImagemCadastro($_FILES['imagem-doador'] ?? null, false);
+    if (!$upload['sucesso']) {
+        return ['sucesso' => false, 'mensagem' => $upload['mensagem'], 'id' => null];
+    }
+
+    $dados['imagem'] = $upload['caminho'];
+    $resultado = cadastrarDoador($conexao, $dados);
+    if (!$resultado['sucesso']) {
+        removerImagemCadastro($upload['arquivo']);
+    }
+
+    return $resultado;
 }
 
 $resultado = processarCadastro($conexao);

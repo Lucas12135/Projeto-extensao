@@ -91,6 +91,13 @@
       }
     }
 
+    .nav-links .profile-image {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
     .hero {
       margin-top: 40px;
       display: grid;

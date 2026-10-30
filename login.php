@@ -9,26 +9,26 @@
     $senhaOng = isset($_POST['senha-ong']) ? $_POST['senha-ong'] : null;
     
     if($emailOng == null) {
-      $smnt=$conexao->prepare("SELECT pw_doador FROM DOADOR WHERE nm_email_doador = :email");
+      $smnt=$conexao->prepare("SELECT nm_email_doador, pw_doador FROM DOADOR WHERE nm_email_doador = :email");
       $smnt->bindParam(":email", $emailDoador);
       $smnt->execute();
       $usuario = $smnt->fetch(PDO::FETCH_ASSOC);
 
       if (password_verify($senhaDoador, $usuario['pw_doador'])) {
-        $_SESSION['usuario_email'] = $usuario['email-doador'];
+        $_SESSION['email-doador'] = $usuario['nm_email_doador'];
         header("Location: index.php");
       } else {
         echo "E-mail ou senha incorretos.";
       }
       
     } else {
-      $smnt=$conexao->prepare("SELECT pw_ong FROM ONG WHERE nm_email_ong = :email");
+      $smnt=$conexao->prepare("SELECT nm_email_ong, pw_ong FROM ONG WHERE nm_email_ong = :email");
       $smnt->bindParam(":email", $emailOng);
       $smnt->execute();
       $usuario = $smnt->fetch(PDO::FETCH_ASSOC);
 
       if (password_verify($senhaOng, $usuario['pw_ong'])) {
-        $_SESSION['usuario_email'] = $usuario['email-ong'];
+        $_SESSION['email-ong'] = $usuario['nm_email_ong'];
         header("Location: index.php");
       } else {
         echo "E-mail ou senha incorretos.";
