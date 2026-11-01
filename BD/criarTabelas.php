@@ -30,6 +30,27 @@ $tabelas = [
     nm_imagem_doador VARCHAR(255)
 )",
 
+    "CREATE TABLE IF NOT EXISTS ENDERECO (
+    id_ENDERECO INT AUTO_INCREMENT PRIMARY KEY,
+    ONG_id_ONG INT NULL UNIQUE,
+    DOADOR_id_Doador INT NULL UNIQUE,
+    cd_cep CHAR(9) NOT NULL,
+    ds_logradouro VARCHAR(150) NOT NULL,
+    nr_endereco VARCHAR(20) NOT NULL,
+    ds_complemento VARCHAR(100),
+    nm_bairro VARCHAR(100) NOT NULL,
+    nm_cidade VARCHAR(100) NOT NULL,
+    sg_uf CHAR(2) NOT NULL,
+    CONSTRAINT fk_endereco_ong FOREIGN KEY (ONG_id_ONG)
+        REFERENCES ONG(id_ONG) ON DELETE CASCADE,
+    CONSTRAINT fk_endereco_doador FOREIGN KEY (DOADOR_id_Doador)
+        REFERENCES DOADOR(id_Doador) ON DELETE CASCADE,
+    CONSTRAINT chk_endereco_proprietario CHECK (
+        (ONG_id_ONG IS NOT NULL AND DOADOR_id_Doador IS NULL) OR
+        (ONG_id_ONG IS NULL AND DOADOR_id_Doador IS NOT NULL)
+    )
+)",
+
     "CREATE TABLE IF NOT EXISTS TRANSPORTADORA (
     id_TRANSPORTADORA INT AUTO_INCREMENT PRIMARY KEY,
     nm_transportadora VARCHAR(30) NOT NULL,
@@ -69,17 +90,5 @@ $tabelas = [
 
 foreach ($tabelas as $sql) {
     $conexao->exec($sql);
-}
-
-$colunasImagem = [
-    'ONG'    => 'nm_imagem_ong',
-    'DOADOR' => 'nm_imagem_doador',
-];
-
-foreach ($colunasImagem as $tabela => $coluna) {
-    $colunasExistentes = $conexao->query("SHOW COLUMNS FROM `$tabela`")->fetchAll(PDO::FETCH_COLUMN);
-    if (!in_array($coluna, $colunasExistentes, true)) {
-        $conexao->exec("ALTER TABLE `$tabela` ADD COLUMN `$coluna` VARCHAR(255)");
-    }
 }
 ?>

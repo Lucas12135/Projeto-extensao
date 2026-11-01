@@ -47,7 +47,7 @@ function salvarImagemCadastro(?array $arquivo, bool $obrigatoria): array
         return ['sucesso' => false, 'caminho' => null, 'arquivo' => null, 'mensagem' => 'Formato inválido. Envie uma imagem JPG, PNG, GIF ou WEBP.'];
     }
 
-    $diretorio = __DIR__ . '/../resource/uploads';
+    $diretorio = __DIR__ . '/../../resource/uploads';
     if (!is_dir($diretorio) && !mkdir($diretorio, 0755, true) && !is_dir($diretorio)) {
         return ['sucesso' => false, 'caminho' => null, 'arquivo' => null, 'mensagem' => 'Não foi possível preparar a pasta de imagens.'];
     }

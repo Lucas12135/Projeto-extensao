@@ -18,6 +18,18 @@ function processarCadastro(PDO $conexao): ?array
     $tipo = campo('tipo', campo('nome-ong') !== null ? 'ong' : 'doador');
 
     if ($tipo === 'ong') {
+        $cepOng = campo('cep-ong');
+        $logradouroOng = campo('logradouro-ong');
+        $numeroOng = campo('numero-ong');
+        $complementoOng = campo('complemento-ong');
+        $bairroOng = campo('bairro-ong');
+        $cidadeOng = campo('cidade-ong');
+        $ufOng = campo('uf-ong');
+
+        if (in_array(null, [$cepOng, $logradouroOng, $numeroOng, $bairroOng, $cidadeOng, $ufOng], true)) {
+            return ['sucesso' => false, 'mensagem' => 'Preencha todos os campos obrigatórios do endereço da ONG.', 'id' => null];
+        }
+
         $dados = [
             'nome'        => campo('nome-ong'),
             'cnpj'        => campo('cnpj-ong'),
@@ -30,7 +42,24 @@ function processarCadastro(PDO $conexao): ?array
             'sobre'       => campo('sobre-ong'),
             'missao'      => campo('missao-ong'),
             'projetos'    => campo('projetos-ong'),
-            'localizacao' => campo('localizacao-ong')
+            'localizacao' => implode(', ', array_filter([
+                $logradouroOng,
+                $numeroOng,
+                $complementoOng,
+                $bairroOng,
+                $cidadeOng,
+                strtoupper($ufOng),
+                $cepOng
+            ], static fn ($parte) => $parte !== null)),
+            'endereco_detalhado' => [
+                'cep'          => $cepOng,
+                'logradouro'   => $logradouroOng,
+                'numero'       => $numeroOng,
+                'complemento'  => $complementoOng,
+                'bairro'       => $bairroOng,
+                'cidade'       => $cidadeOng,
+                'uf'           => strtoupper($ufOng)
+            ]
         ];
 
         if ($dados['senha'] !== campo('confirmar-senha') || campo('agreement') === null) {
@@ -55,12 +84,41 @@ function processarCadastro(PDO $conexao): ?array
         return ['sucesso' => false, 'mensagem' => 'Tipo de cadastro inválido.', 'id' => null];
     }
 
+    $cep = campo('cep-doador');
+    $logradouro = campo('logradouro-doador');
+    $numero = campo('numero-doador');
+    $complemento = campo('complemento-doador');
+    $bairro = campo('bairro-doador');
+    $uf = campo('uf-doador');
+
+    $cidade = campo('cidade-doador');
+    if (in_array(null, [$cep, $logradouro, $numero, $bairro, $cidade, $uf], true)) {
+        return ['sucesso' => false, 'mensagem' => 'Preencha todos os campos obrigatórios do endereço.', 'id' => null];
+    }
+
     $dados = [
         'nome'     => campo('nome-doador'),
         'cpf'      => campo('cpf-doador'),
         'email'    => campo('email-doador'),
         'telefone' => campo('telefone-doador'),
-        'endereco' => campo('endereco-doador'),
+        'endereco' => implode(', ', array_filter([
+            $logradouro,
+            $numero,
+            $complemento,
+            $bairro,
+            $cidade,
+            strtoupper($uf),
+            $cep
+        ], static fn ($parte) => $parte !== null)),
+        'endereco_detalhado' => [
+            'cep'         => $cep,
+            'logradouro'  => $logradouro,
+            'numero'      => $numero,
+            'complemento' => $complemento,
+            'bairro'      => $bairro,
+            'cidade'      => $cidade,
+            'uf'          => strtoupper($uf)
+        ],
         'senha'    => campo('senha-doador')
     ];
 
