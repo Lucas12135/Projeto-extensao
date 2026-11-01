@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/../BD/conexao.php";
+require_once __DIR__ . "/../../BD/conexao.php";
 require_once __DIR__ . "/cadastrarOng.php";
 require_once __DIR__ . "/cadastrarDoador.php";
 require_once __DIR__ . "/uploadImagem.php";

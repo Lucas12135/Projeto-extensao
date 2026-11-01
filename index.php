@@ -53,7 +53,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
             echo '<img class="profile-image" src="' . htmlspecialchars($imagemPerfil, ENT_QUOTES, 'UTF-8') . '" alt="Imagem do perfil">';
           }
           ?>
-          <a href="#sobre">Sobre nós</a>
+          <a href="#sobre">Sobre nós</a> 
           <a href="ongs.php">ONGs Parceiras</a>
           <a href="contato.php">Contato</a>
         </nav>

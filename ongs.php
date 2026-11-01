@@ -152,6 +152,6 @@ $escapar = static function ($valor) {
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>
   </footer>
-    <script src="script.js"></script>
+    <script src="JS/cardOng.js"></script>
 </body>
 </html>

@@ -123,6 +123,6 @@
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="JS/forms.js"></script>
 </body>
 </html>
