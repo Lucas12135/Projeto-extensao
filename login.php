@@ -118,7 +118,9 @@
       </div>
     </div>
   </main>
-
+  
+  <?php include __DIR__ . "/PHP/acessibilidade.php"; ?>
+  
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>
   </footer>

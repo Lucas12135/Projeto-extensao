@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . "/PHP/FUNCOES/processarCadastro.php"; ?>
+<?php require_once __DIR__ . "/PHP/FUNCOES/processarCadastro.php"; $conexao = null;?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -42,6 +42,8 @@
       </div>
     </div>
   </main>
+
+  <?php include __DIR__ . "/PHP/acessibilidade.php"; ?>
 
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>

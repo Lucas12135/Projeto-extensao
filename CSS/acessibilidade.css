@@ -1,0 +1,194 @@
+.accessibility-widget {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10000000;
+  font-family: Arial, sans-serif;
+}
+
+.accessibility-toggle,
+.accessibility-panel button {
+  min-height: 44px;
+  border: 2px solid #123047;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #123047;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.accessibility-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+}
+
+.accessibility-toggle svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.accessibility-panel {
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100vh - 100px);
+  margin-bottom: 12px;
+  padding: 16px;
+  border: 2px solid #123047;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #123047;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 25%);
+  overflow-y: auto;
+}
+
+.accessibility-panel[hidden] {
+  display: none;
+}
+
+.accessibility-panel h2 {
+  margin: 0 0 12px;
+  font-size: 1.1em;
+}
+
+.accessibility-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.accessibility-panel .accessibility-option {
+  display: flex;
+  min-height: 76px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.accessibility-option svg {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  fill: currentColor;
+}
+
+.accessibility-option[aria-pressed="true"] {
+  background: #dceef8;
+  box-shadow: inset 0 0 0 2px #123047;
+}
+
+.accessibility-panel-footer {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.accessibility-panel .accessibility-reset {
+  padding: 8px;
+}
+
+.accessibility-panel button:hover,
+.accessibility-toggle:hover {
+  background: #e8f4fb;
+}
+
+.accessibility-toggle:focus-visible,
+.accessibility-panel button:focus-visible {
+  outline: 3px solid #e66c00;
+  outline-offset: 3px;
+}
+
+.accessibility-status {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+html.accessibility-high-contrast,
+html.accessibility-high-contrast body,
+html.accessibility-high-contrast body *:not(img):not(svg):not(path) {
+  border-color: #ffffff !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+html.accessibility-high-contrast a {
+  color: #ffff00 !important;
+  text-decoration: underline !important;
+}
+
+html.accessibility-high-contrast :focus-visible {
+  outline: 3px solid #ffff00 !important;
+  outline-offset: 3px;
+}
+
+html.accessibility-highlight-links body a {
+  background: #ffff00 !important;
+  color: #000000 !important;
+  outline: 2px solid #000000;
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+}
+
+html.accessibility-text-spacing body,
+html.accessibility-text-spacing body * {
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+html.accessibility-stop-animations body *,
+html.accessibility-stop-animations body *::before,
+html.accessibility-stop-animations body *::after {
+  animation: none !important;
+  scroll-behavior: auto !important;
+  transition: none !important;
+}
+
+html.accessibility-hide-images body img,
+html.accessibility-hide-images body picture {
+  visibility: hidden !important;
+}
+
+html.accessibility-dyslexia-font body,
+html.accessibility-dyslexia-font body * {
+  font-family: Arial, Verdana, sans-serif !important;
+}
+
+html.accessibility-large-cursor body,
+html.accessibility-large-cursor body * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 2v25l7-7 5 10 5-2-5-10h10z' fill='%23fff' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") 4 2, auto !important;
+}
+
+html.accessibility-line-height body,
+html.accessibility-line-height body * {
+  line-height: 1.8 !important;
+}
+
+html.accessibility-align-left body * {
+  text-align: left !important;
+}
+
+html.accessibility-align-center body * {
+  text-align: center !important;
+}
+
+html.accessibility-align-right body * {
+  text-align: right !important;
+}
+
+@media (max-width: 480px) {
+  .accessibility-widget {
+    right: 16px;
+    bottom: 16px;
+  }
+}

@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . "/BD/conexao.php";
+session_start();
+require_once __DIR__ . "/PHP/pegarSessao.php";
+
 $smnt = $conexao->prepare(
   "SELECT nm_ong, nm_email_ong, cd_telefone_ong, cd_distancia_km,
           ds_doacoes, ds_sobre, ds_missao, ds_projetos, ds_localizacao, nm_imagem_ong
@@ -12,6 +14,8 @@ $ongSelecionada = $ongs[0] ?? null;
 $escapar = static function ($valor) {
   return htmlspecialchars((string) ($valor ?? ''), ENT_QUOTES, 'UTF-8');
 };
+
+$conexao = null;
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -30,6 +34,16 @@ $escapar = static function ($valor) {
             REUNE<b>+</b>
         </div>
         <nav class="nav-links">
+          <?php 
+          if (!isset($_SESSION["email-doador"]) && (!isset($_SESSION["email-ong"]))) {
+          echo "<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='currentColor' class='bi bi-person-circle' viewBox='0 0 16 16'>
+  <path d='M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0'/>
+  <path fill-rule='evenodd' d='M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1'/>
+</svg>";
+          } else {
+            echo '<img class="profile-image" src="' . htmlspecialchars($imagemPerfil, ENT_QUOTES, 'UTF-8') . '" alt="Imagem do perfil">';
+          }
+          ?>
           <a href="index.php">Sobre nós</a>
           <a href="ongs.php">ONGs Parceiras</a>
           <a href="contato.php">Contato</a>
@@ -148,6 +162,8 @@ $escapar = static function ($valor) {
       </section>
     </div>
   </main>
+
+  <?php include __DIR__ . "/PHP/acessibilidade.php"; ?>
 
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>

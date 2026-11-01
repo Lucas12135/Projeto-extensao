@@ -2,28 +2,14 @@
 session_start();
 require_once __DIR__ .  "/BD/conexao.php";
 require_once __DIR__ . "/BD/criarTabelas.php";
+include_once __DIR__ . "/PHP/pegarSessao.php";
 
 $smnt= $conexao->prepare("SELECT COUNT(id_ONG) AS qt FROM ONG");
 
 $smnt->execute();
 $qnt = $smnt->fetch(PDO::FETCH_ASSOC);
 
-if (isset($_SESSION["email-ong"])) {
-$smnt= $conexao->prepare("SELECT nm_imagem_ong FROM ONG WHERE nm_email_ong = :email");
-$smnt->execute([':email' => $_SESSION["email-ong"]]);
-
-$tmp = $smnt->fetch(PDO::FETCH_ASSOC) ?: [];
-$img = $tmp['nm_imagem_ong'] ?? null;
-
-} else if (isset($_SESSION["email-doador"])) {
-$smnt= $conexao->prepare("SELECT nm_imagem_doador FROM DOADOR WHERE nm_email_doador = :email");
-$smnt->execute([':email' => $_SESSION["email-doador"]]);
-
-$tmp = $smnt->fetch(PDO::FETCH_ASSOC) ?: [];
-$img = $tmp['nm_imagem_doador'] ?? null;
-}
-
-$imagemPerfil = $img ?? 'resource/logo.jpeg';
+$conexao = null;
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -109,6 +95,8 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
       </div>
     </section>
   </main>
+
+  <?php include __DIR__ . "/PHP/acessibilidade.php"; ?>
 
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>
