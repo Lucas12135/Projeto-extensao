@@ -134,3 +134,26 @@ document.querySelectorAll('.signup-form').forEach(form => {
     }
   });
 });
+
+document.querySelectorAll('.profile-field').forEach(form => {
+  const field = form.querySelector('input[name="valor"], textarea[name="valor"]');
+  const editButton = form.querySelector('[data-profile-edit]');
+  const saveButton = form.querySelector('[data-profile-save]');
+  const cancelButton = form.querySelector('[data-profile-cancel]');
+
+  editButton.addEventListener('click', function() {
+    field.disabled = false;
+    editButton.hidden = true;
+    saveButton.hidden = false;
+    cancelButton.hidden = false;
+    field.focus();
+  });
+
+  cancelButton.addEventListener('click', function() {
+    field.value = field.defaultValue;
+    field.disabled = true;
+    editButton.hidden = false;
+    saveButton.hidden = true;
+    cancelButton.hidden = true;
+  });
+});
