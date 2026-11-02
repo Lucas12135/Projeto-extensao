@@ -1130,6 +1130,7 @@ footer {
   border-top: 1px solid var(--line);
 }
 .profile-logout-button {
+  cursor: pointer;
   border: 1px solid rgba(var(--danger-rgb), 0.25);
   padding: 7px 13px;
   border-radius: 9px;
@@ -1140,13 +1141,14 @@ footer {
   background: rgba(var(--danger-rgb), 0.25);
 }
 .profile-delete-button {
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
   border: 1px solid rgba(var(--danger-rgb), 0.25);
   padding: 7px 13px;
   border-radius: 9px;
-  color: rgba(var(--danger-rgb), 0.06);
+  color: rgba(var(--white-rgb), 0.8);
   background: var(--danger);
 }
 .profile-delete-button:hover {

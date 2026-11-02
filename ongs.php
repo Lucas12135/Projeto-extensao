@@ -1,5 +1,8 @@
 <?php
+session_start();
 require_once __DIR__ . "/BD/conexao.php";
+require_once __DIR__ . "/BD/criarTabelas.php";
+
 $smnt = $conexao->prepare(
   "SELECT nm_ong, nm_email_ong, cd_telefone_ong, cd_distancia_km,
           ds_doacoes, ds_sobre, ds_missao, ds_projetos, ds_localizacao, nm_imagem_ong
@@ -12,9 +15,30 @@ $ongSelecionada = $ongs[0] ?? null;
 $escapar = static function ($valor) {
   return htmlspecialchars((string) ($valor ?? ''), ENT_QUOTES, 'UTF-8');
 };
+
+$smnt = $conexao->prepare("SELECT COUNT(id_ONG) AS qt FROM ONG");
+
+$smnt->execute();
+$qnt = $smnt->fetch(PDO::FETCH_ASSOC);
+if (isset($_SESSION["email-ong"])) {
+  $smnt = $conexao->prepare("SELECT nm_imagem_ong FROM ONG WHERE nm_email_ong = :email");
+  $smnt->execute([':email' => $_SESSION["email-ong"]]);
+
+  $tmp = $smnt->fetch(PDO::FETCH_ASSOC) ?: [];
+  $img = $tmp['nm_imagem_ong'] ?? null;
+} else if (isset($_SESSION["email-doador"])) {
+  $smnt = $conexao->prepare("SELECT nm_imagem_doador FROM DOADOR WHERE nm_email_doador = :email");
+  $smnt->execute([':email' => $_SESSION["email-doador"]]);
+
+  $tmp = $smnt->fetch(PDO::FETCH_ASSOC) ?: [];
+  $img = $tmp['nm_imagem_doador'] ?? null;
+}
+
+$imagemPerfil = $img ?? 'resource/logo.jpeg';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,14 +46,27 @@ $escapar = static function ($valor) {
   <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <header>
     <div class="container">
       <div class="topbar">
         <div class="brand"><img src="resource/logo.jpeg" alt="Ícone de mãos unidas" class="logo">
-            REUNE<b>+</b>
+          REUNE<b>+</b>
         </div>
         <nav class="nav-links">
+          <a href="perfil.php">
+            <?php
+            if (!isset($_SESSION["email-doador"]) && (!isset($_SESSION["email-ong"]))) {
+              echo "<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' fill='currentColor' class='bi bi-person-circle' viewBox='0 0 16 16'>
+  <path d='M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0'/>
+  <path fill-rule='evenodd' d='M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1'/>
+</svg>";
+            } else {
+              echo '<img class="profile-image" src="' . htmlspecialchars($imagemPerfil, ENT_QUOTES, 'UTF-8') . '" alt="Imagem do perfil">';
+            }
+            ?>
+          </a>
           <a href="index.php">Sobre nós</a>
           <a href="ongs.php">ONGs Parceiras</a>
           <a href="contato.php">Contato</a>
@@ -50,7 +87,7 @@ $escapar = static function ($valor) {
           <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Pesquisar ONGs..." class="search-input">
           </div>
-          
+
           <div class="filters-group">
             <div class="filter-item">
               <label for="sortFilter">Ordenar por:</label>
@@ -71,10 +108,10 @@ $escapar = static function ($valor) {
             <?php else: ?>
               <?php foreach ($ongs as $indice => $ong): ?>
                 <?php
-                  $nome = $escapar($ong['nm_ong']);
-                  $distancia = $ong['cd_distancia_km'] ?? '';
-                  $doacoes = $ong['ds_doacoes'] ?? '';
-                  $imagem = $ong['nm_imagem_ong'] ?: 'resource/logo.jpeg';
+                $nome = $escapar($ong['nm_ong']);
+                $distancia = $ong['cd_distancia_km'] ?? '';
+                $doacoes = $ong['ds_doacoes'] ?? '';
+                $imagem = $ong['nm_imagem_ong'] ?: 'resource/logo.jpeg';
                 ?>
                 <button
                   type="button"
@@ -89,8 +126,7 @@ $escapar = static function ($valor) {
                   data-localizacao="<?= $escapar($ong['ds_localizacao']) ?>"
                   data-telefone="<?= $escapar($ong['cd_telefone_ong']) ?>"
                   data-email="<?= $escapar($ong['nm_email_ong']) ?>"
-                  aria-pressed="<?= $indice === 0 ? 'true' : 'false' ?>"
-                >
+                  aria-pressed="<?= $indice === 0 ? 'true' : 'false' ?>">
                   <img src="<?= $escapar($imagem) ?>" alt="Logo da ONG">
                   <div class="card-info">
                     <h4><?= $nome ?></h4>
@@ -152,6 +188,7 @@ $escapar = static function ($valor) {
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>
   </footer>
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>
