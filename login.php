@@ -14,7 +14,7 @@
       $smnt->execute();
       $usuario = $smnt->fetch(PDO::FETCH_ASSOC);
 
-      if (password_verify($senhaDoador, $usuario['pw_doador'])) {
+      if ($usuario && password_verify($senhaDoador, $usuario['pw_doador'])) {
         $_SESSION['email-doador'] = $usuario['nm_email_doador'];
         header("Location: index.php");
       } else {
@@ -27,7 +27,7 @@
       $smnt->execute();
       $usuario = $smnt->fetch(PDO::FETCH_ASSOC);
 
-      if (password_verify($senhaOng, $usuario['pw_ong'])) {
+      if ($usuario && password_verify($senhaOng, $usuario['pw_ong'])) {
         $_SESSION['email-ong'] = $usuario['nm_email_ong'];
         header("Location: index.php");
       } else {
