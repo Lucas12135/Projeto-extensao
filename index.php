@@ -45,7 +45,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
           REUNE<b>+</b>
         </div>
         <nav class="nav-links">
-          <a href="perfil.php">
+          <a href="perfil.php" aria-label="Perfil do Usuário">
             <?php
             if (!isset($_SESSION["email-doador"]) && (!isset($_SESSION["email-ong"]))) {
               echo "<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' fill='currentColor' class='bi bi-person-circle' viewBox='0 0 16 16'>
@@ -57,9 +57,9 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
             }
             ?>
           </a>
-          <a href="#sobre">Sobre nós</a>
-          <a href="ongs.php">ONGs Parceiras</a>
-          <a href="contato.php">Contato</a>
+          <a href="#sobre" aria-label="Sobre nós">Sobre nós</a>
+          <a href="ongs.php" aria-label="ONGs Parceiras">ONGs Parceiras</a>
+          <a href="contato.php" aria-label="Contato">Contato</a>
         </nav>
       </div>
 

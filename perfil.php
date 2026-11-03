@@ -320,8 +320,6 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
 
                             <div class="profile-field-actions">
                                 <button type="button" class="profile-edit-button" data-profile-edit>Editar</button>
-                                <button type="submit" class="profile-save-button" data-profile-save hidden>Salvar</button>
-                                <button type="button" class="profile-cancel-button" data-profile-cancel hidden>Cancelar</button>
                             </div>
                         </form>
                     <?php endforeach; ?>
@@ -331,7 +329,7 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
                         <button type="submit" class="profile-logout-button">Sair da conta</button>
                     </form>
                     <form class="profile-delete-form" method="POST" action="./PHP/excluirConta.php">
-                        <button type="submit" class="profile-delete-button">Excluir conta 
+                        <button type="submit" class="profile-delete-button">Excluir conta
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5" />
                             </svg>
@@ -340,12 +338,49 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
                 </div>
             </section>
         </section>
+
+        <dialog class="profile-modal" id="profile-edit-modal" aria-labelledby="profile-edit-modal-title">
+            <div class="profile-modal-header">
+                <h2 id="profile-edit-modal-title">Editar informação</h2>
+                <button type="button" class="profile-modal-close" data-profile-modal-close aria-label="Fechar">&times;</button>
+            </div>
+            <div class="profile-modal-content" id="profile-edit-control"></div>
+            <div class="profile-modal-actions">
+                <button type="button" class="profile-modal-button profile-modal-cancel" data-profile-modal-close>Cancelar</button>
+                <button type="button" class="profile-modal-button profile-modal-save" id="profile-edit-save">Salvar alterações</button>
+            </div>
+        </dialog>
+
+        <dialog class="profile-modal profile-warning-modal" id="profile-logout-modal" aria-labelledby="profile-logout-title">
+            <div class="profile-modal-header">
+                <h2 id="profile-logout-title">Sair da conta?</h2>
+                <button type="button" class="profile-modal-close" data-profile-modal-close aria-label="Fechar">&times;</button>
+            </div>
+            <p>Você precisará entrar novamente para acessar sua conta.</p>
+            <div class="profile-modal-actions">
+                <button type="button" class="profile-modal-button profile-modal-cancel" data-profile-modal-close>Continuar no perfil</button>
+                <button type="button" class="profile-modal-button profile-modal-confirm" data-confirm-form="profile-logout-form">Sair da conta</button>
+            </div>
+        </dialog>
+
+        <dialog class="profile-modal profile-warning-modal" id="profile-delete-modal" aria-labelledby="profile-delete-title">
+            <div class="profile-modal-header">
+                <h2 id="profile-delete-title">Excluir conta?</h2>
+                <button type="button" class="profile-modal-close" data-profile-modal-close aria-label="Fechar">&times;</button>
+            </div>
+            <p>Esta ação é permanente. Seus dados de conta serão excluídos e não poderão ser recuperados.</p>
+            <div class="profile-modal-actions">
+                <button type="button" class="profile-modal-button profile-modal-cancel" data-profile-modal-close>Manter minha conta</button>
+                <button type="button" class="profile-modal-button profile-modal-confirm" data-confirm-form="profile-delete-form">Excluir conta</button>
+            </div>
+        </dialog>
     </main>
 
     <footer>
         <p>© 2026 REUNE+. Juntos pela transformação social.</p>
     </footer>
-    <script src="script.js"></script>
+    <?php include_once __DIR__ . "/PHP/acessibilidade.php"; ?>
+    <script src="JS/perfil.js"></script>
 </body>
 
 </html>
