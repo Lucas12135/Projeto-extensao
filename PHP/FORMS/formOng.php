@@ -39,7 +39,10 @@
 
         <div class="form-group">
             <label for="cep-ong">CEP</label>
-            <input type="text" id="cep-ong" name="cep-ong" placeholder="00000-000" inputmode="numeric" autocomplete="postal-code" maxlength="9" required>
+            <div class="cep-input-wrapper">
+                <input type="text" id="cep-ong" name="cep-ong" placeholder="00000-000" inputmode="numeric" autocomplete="postal-code" maxlength="9" required>
+                <button type="button" class="cep-info-button" data-cep-suffix="ong" aria-label="Ver informações do CEP">+</button>
+            </div>
             <small id="cep-status-ong" aria-live="polite"></small>
         </div>
 
@@ -129,4 +132,19 @@
             <button type="submit" class="btn-signup">Cadastrar como ONG</button>
         </div>
     </fieldset>
+
+    <dialog class="cep-info-modal" id="cep-info-modal-ong" aria-labelledby="cep-info-title-ong">
+        <div class="cep-info-modal-header">
+            <h2 id="cep-info-title-ong">Informações do CEP</h2>
+            <button type="button" class="cep-info-close" aria-label="Fechar informações do CEP">&times;</button>
+        </div>
+        <p class="cep-info-message" id="cep-info-message-ong" aria-live="polite">Buscando endereço...</p>
+        <dl class="cep-info-details" id="cep-info-details-ong" hidden>
+            <div><dt>CEP</dt><dd data-cep-info="cep"></dd></div>
+            <div><dt>Logradouro</dt><dd data-cep-info="logradouro"></dd></div>
+            <div><dt>Bairro</dt><dd data-cep-info="bairro"></dd></div>
+            <div><dt>Cidade</dt><dd data-cep-info="cidade"></dd></div>
+            <div><dt>UF</dt><dd data-cep-info="uf"></dd></div>
+        </dl>
+    </dialog>
 </form>
