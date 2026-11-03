@@ -345,7 +345,7 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
     <footer>
         <p>© 2026 REUNE+. Juntos pela transformação social.</p>
     </footer>
-    <script src="script.js"></script>
+    <?php include_once __DIR__ . "/PHP/acessibilidade.php"; ?>
 </body>
 
 </html>

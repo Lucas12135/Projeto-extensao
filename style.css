@@ -29,6 +29,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  border: none;
 }
 body {
   display: flex;
@@ -1085,7 +1086,6 @@ footer {
 .profile-field textarea:disabled {
   opacity: 1;
   color: var(--text);
-  -webkit-text-fill-color: var(--text);
 }
 .profile-field input:not(:disabled),
 .profile-field textarea:not(:disabled) {
