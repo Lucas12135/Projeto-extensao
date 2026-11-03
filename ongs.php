@@ -190,7 +190,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>
   </footer>
-  <script src="script.js"></script>
+  <script src="cardOng.js"></script>
 </body>
 
 </html>

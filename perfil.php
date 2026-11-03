@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/BD/conexao.php";
-require_once __DIR__ . "/PHP/uploadImagem.php";
+require_once __DIR__ . "/BD/criarTabelas.php";
+require_once __DIR__ . "/PHP/FUNCOES/uploadImagem.php";
 
 session_start();
 
@@ -15,6 +16,9 @@ if (!is_string($emailSessao) || $emailSessao === "") {
 
 if ($isOng) {
     $tabela = "ONG";
+    $colunaId = "id_ONG";
+    $colunaEnderecoDono = "ONG_id_ONG";
+    $colunaLocalizacao = "ds_localizacao";
     $colunaEmail = "nm_email_ong";
     $colunaImagem = "nm_imagem_ong";
     $tipoPerfil = "Perfil da organização";
@@ -22,7 +26,6 @@ if ($isOng) {
         "nome" => ["label" => "Nome da ONG", "coluna" => "nm_ong", "tipo" => "text", "max" => 30],
         "email" => ["label" => "E-mail", "coluna" => $colunaEmail, "tipo" => "email", "max" => 50],
         "telefone" => ["label" => "Telefone", "coluna" => "cd_telefone_ong", "tipo" => "tel", "max" => 20],
-        "localizacao" => ["label" => "Localização", "coluna" => "ds_localizacao", "tipo" => "text", "max" => 255],
         "doacoes" => ["label" => "Doações aceitas", "coluna" => "ds_doacoes", "tipo" => "textarea"],
         "sobre" => ["label" => "Sobre", "coluna" => "ds_sobre", "tipo" => "textarea"],
         "missao" => ["label" => "Missão", "coluna" => "ds_missao", "tipo" => "textarea"],
@@ -31,6 +34,9 @@ if ($isOng) {
     ];
 } else {
     $tabela = "DOADOR";
+    $colunaId = "id_Doador";
+    $colunaEnderecoDono = "DOADOR_id_Doador";
+    $colunaLocalizacao = "ds_endereco_doador";
     $colunaEmail = "nm_email_doador";
     $colunaImagem = "nm_imagem_doador";
     $tipoPerfil = "Perfil do doador";
@@ -38,10 +44,14 @@ if ($isOng) {
         "nome" => ["label" => "Nome completo", "coluna" => "nm_doador", "tipo" => "text", "max" => 50],
         "email" => ["label" => "E-mail", "coluna" => $colunaEmail, "tipo" => "email", "max" => 50],
         "telefone" => ["label" => "Telefone", "coluna" => "cd_telefone_doador", "tipo" => "tel", "max" => 20],
-        "endereco" => ["label" => "Endereço", "coluna" => "ds_endereco_doador", "tipo" => "text", "max" => 255],
         "cpf" => ["label" => "CPF", "coluna" => "cd_cpf_doador", "tipo" => "text", "max" => 14],
     ];
 }
+
+$camposEndereco = [
+    "cep" => ["label" => "CEP", "coluna" => "cd_cep", "tipo" => "text", "max" => 9],
+];
+$camposPerfil = array_merge($campos, $camposEndereco);
 
 $mensagem = null;
 $sucesso = false;
@@ -53,14 +63,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $chaveCampo = $_POST["campo"] ?? "";
         $valor = $_POST["valor"] ?? null;
 
-        if (!is_string($chaveCampo) || !isset($campos[$chaveCampo]) || !is_string($valor)) {
+        if (!is_string($chaveCampo) || !isset($camposPerfil[$chaveCampo]) || !is_string($valor)) {
             $mensagem = "Não foi possível identificar o dado para edição.";
         } else {
-            $campo = $campos[$chaveCampo];
+            $campo = $camposPerfil[$chaveCampo];
             $valor = trim($valor);
+            if ($chaveCampo === "uf") {
+                $valor = strtoupper($valor);
+            }
             $quantidadeCaracteres = preg_match_all("/./us", $valor);
 
-            if ($valor === "") {
+            if ($valor === "" && empty($campo["opcional"])) {
                 $mensagem = "Este campo não pode ficar vazio.";
             } elseif ($quantidadeCaracteres === false) {
                 $mensagem = "O valor informado contém caracteres inválidos.";
@@ -86,6 +99,55 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     if ($emailEmUso) {
                         $mensagem = "Este e-mail já está sendo usado por outra conta.";
+                    } elseif (isset($camposEndereco[$chaveCampo])) {
+                        $consultaId = $conexao->prepare(
+                            "SELECT $colunaId FROM $tabela WHERE $colunaEmail = :email"
+                        );
+                        $consultaId->execute([":email" => $emailSessao]);
+                        $idPerfil = $consultaId->fetchColumn();
+
+                        $consultaEndereco = $conexao->prepare(
+                            "SELECT id_ENDERECO FROM ENDERECO WHERE $colunaEnderecoDono = :id"
+                        );
+                        $consultaEndereco->execute([":id" => $idPerfil]);
+
+                        if ($consultaEndereco->fetchColumn() === false) {
+                            $mensagem = "O endereço deste perfil não foi encontrado.";
+                        } else {
+                            $conexao->beginTransaction();
+                            $atualizacaoEndereco = $conexao->prepare(
+                                "UPDATE ENDERECO SET {$campo["coluna"]} = :valor
+                                 WHERE $colunaEnderecoDono = :id"
+                            );
+                            $atualizacaoEndereco->execute([
+                                ":valor" => $valor === "" ? null : $valor,
+                                ":id" => $idPerfil,
+                            ]);
+
+                            $consultaEndereco = $conexao->prepare(
+                                "SELECT ds_logradouro, nr_endereco, ds_complemento,
+                                        nm_bairro, nm_cidade, sg_uf, cd_cep
+                                 FROM ENDERECO WHERE $colunaEnderecoDono = :id"
+                            );
+                            $consultaEndereco->execute([":id" => $idPerfil]);
+                            $endereco = $consultaEndereco->fetch(PDO::FETCH_ASSOC);
+                            $localizacao = implode(", ", array_filter(
+                                $endereco,
+                                static fn($parte) => $parte !== null && $parte !== ""
+                            ));
+                            $atualizacaoLocalizacao = $conexao->prepare(
+                                "UPDATE $tabela SET $colunaLocalizacao = :localizacao
+                                 WHERE $colunaId = :id"
+                            );
+                            $atualizacaoLocalizacao->execute([
+                                ":localizacao" => $localizacao,
+                                ":id" => $idPerfil,
+                            ]);
+                            $conexao->commit();
+
+                            $mensagem = "Endereço atualizado com sucesso.";
+                            $sucesso = true;
+                        }
                     } else {
                         $atualizacao = $conexao->prepare(
                             "UPDATE $tabela SET {$campo["coluna"]} = :valor
@@ -105,6 +167,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         $sucesso = true;
                     }
                 } catch (PDOException $erro) {
+                    if ($conexao->inTransaction()) {
+                        $conexao->rollBack();
+                    }
                     error_log("Erro ao atualizar perfil: " . $erro->getMessage());
                     $mensagem = "Não foi possível atualizar este dado. Tente novamente.";
                 }
@@ -141,7 +206,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 $colunas = array_column($campos, "coluna");
 $colunas[] = $colunaImagem;
 $consulta = $conexao->prepare(
-    "SELECT " . implode(", ", $colunas) . " FROM $tabela WHERE $colunaEmail = :email"
+    "SELECT " . implode(", ", array_map(
+        static fn($coluna) => "perfil.$coluna",
+        $colunas
+    )) . ",
+        endereco.cd_cep AS cd_cep,
+        endereco.ds_logradouro AS ds_logradouro,
+        endereco.nr_endereco AS nr_endereco,
+        endereco.ds_complemento AS ds_complemento,
+        endereco.nm_bairro AS nm_bairro,
+        endereco.nm_cidade AS nm_cidade,
+        endereco.sg_uf AS sg_uf
+     FROM $tabela perfil
+     LEFT JOIN ENDERECO endereco ON endereco.$colunaEnderecoDono = perfil.$colunaId
+     WHERE perfil.$colunaEmail = :email"
 );
 $consulta->execute([":email" => $emailSessao]);
 $perfil = $consulta->fetch(PDO::FETCH_ASSOC);
@@ -223,7 +301,7 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
                 </div>
 
                 <div class="profile-info">
-                    <?php foreach ($campos as $chave => $campo): ?>
+                    <?php foreach ($camposPerfil as $chave => $campo): ?>
                         <?php $id = "perfil-" . $chave; ?>
                         <form class="profile-field" method="POST">
                             <input type="hidden" name="acao" value="atualizar_campo">
@@ -237,7 +315,7 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
                             <?php else: ?>
                                 <input id="<?= escaparPerfil($id) ?>" name="valor" type="<?= escaparPerfil($campo["tipo"]) ?>"
                                     value="<?= escaparPerfil((string) ($perfil[$campo["coluna"]] ?? "")) ?>"
-                                    maxlength="<?= (int) $campo["max"] ?>" disabled required>
+                                    maxlength="<?= (int) $campo["max"] ?>" disabled <?= empty($campo["opcional"]) ? "required" : "" ?>>
                             <?php endif; ?>
 
                             <div class="profile-field-actions">
