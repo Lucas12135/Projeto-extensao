@@ -43,8 +43,9 @@
     <fieldset class="signup-step" id="doador-step-2" disabled hidden>
         <div class="form-group">
             <label for="cpf-doador">CPF</label>
-            <input type="text" id="cpf-doador" name="cpf-doador" placeholder="XXX.XXX.XXX-XX" oninput="formatarCPF()"
-                maxlength="14" required>
+            <input type="text" id="cpf-doador" name="cpf-doador" placeholder="XXX.XXX.XXX-XX" oninput="formatarCPF(); verificarCPF()"
+                maxlength="14" onblur="verificarCPF(true)" required>
+            <small id="cpf-status-doador" aria-live="polite"></small>
         </div>
 
         <div class="form-group">

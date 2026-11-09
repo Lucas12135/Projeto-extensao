@@ -50,6 +50,7 @@
   </footer>
 
   <script src="JS/formatar.js"></script>
+  <script src="JS/verificacao.js"></script>
   <script src="JS/viaCep.js"></script>
   <script src="JS/forms.js"></script>
 </body>
