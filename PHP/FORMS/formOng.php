@@ -34,7 +34,8 @@
     <fieldset class="ong-step" id="ong-step-2" disabled hidden>
         <div class="form-group">
             <label for="cnpj-ong">CNPJ</label>
-            <input type="text" id="cnpj-ong" name="cnpj-ong" placeholder="XX.XXX.XXX/XXXX-XX" oninput="formatarCNPJ()" maxlength="18" required>
+            <input type="text" id="cnpj-ong" name="cnpj-ong" placeholder="XX.XXX.XXX/XXXX-XX" oninput="formatarCNPJ(); verificarCNPJ()" maxlength="18" onblur="verificarCNPJ(true)" required>
+            <small id="cnpj-status-ong" aria-live="polite"></small>
         </div>
 
         <div class="form-group">

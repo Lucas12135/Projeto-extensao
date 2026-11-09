@@ -1,14 +1,17 @@
 <?php 
   require_once __DIR__ .  "/BD/conexao.php";
   session_start();
+  $erroLogin = false;
+  $tipoLogin = 'doador';
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $tipoLogin = isset($_POST['email-ong']) ? 'ong' : 'doador';
     $emailDoador = isset($_POST['email-doador']) ? $_POST['email-doador'] : null;
     $senhaDoador = isset($_POST['senha-doador']) ? $_POST['senha-doador'] : null;
 
     $emailOng = isset($_POST['email-ong']) ? $_POST['email-ong'] : null;
     $senhaOng = isset($_POST['senha-ong']) ? $_POST['senha-ong'] : null;
     
-    if($emailOng == null) {
+    if ($tipoLogin === 'doador') {
       $smnt=$conexao->prepare("SELECT nm_email_doador, pw_doador FROM DOADOR WHERE nm_email_doador = :email");
       $smnt->bindParam(":email", $emailDoador);
       $smnt->execute();
@@ -17,8 +20,9 @@
       if ($usuario && password_verify($senhaDoador, $usuario['pw_doador'])) {
         $_SESSION['email-doador'] = $usuario['nm_email_doador'];
         header("Location: index.php");
+        exit;
       } else {
-        echo "E-mail ou senha incorretos.";
+        $erroLogin = true;
       }
       
     } else {
@@ -30,8 +34,9 @@
       if ($usuario && password_verify($senhaOng, $usuario['pw_ong'])) {
         $_SESSION['email-ong'] = $usuario['nm_email_ong'];
         header("Location: index.php");
+        exit;
       } else {
-        echo "E-mail ou senha incorretos.";
+        $erroLogin = true;
       }
     }
     $conexao = null;
@@ -67,11 +72,14 @@
           <p class="login-subtitle">Faça login na sua conta</p>
 
           <div class="login-tabs">
-            <button class="tab-button active" onclick="trocarAba('doador')">Doador</button>
-            <button class="tab-button" onclick="trocarAba('ong')">ONG</button>
+            <button class="tab-button <?= $tipoLogin === 'doador' ? 'active' : '' ?>" onclick="trocarAba('doador')">Doador</button>
+            <button class="tab-button <?= $tipoLogin === 'ong' ? 'active' : '' ?>" onclick="trocarAba('ong')">ONG</button>
           </div>
 
-          <form class="login-form active" id="form-doador" action="#" method="POST">
+          <form class="login-form <?= $tipoLogin === 'doador' ? 'active' : '' ?>" id="form-doador" action="#" method="POST">
+            <?php if ($erroLogin && $tipoLogin === 'doador'): ?>
+              <p class="login-error" role="alert">E-mail ou senha incorretos.</p>
+            <?php endif; ?>
             <div class="form-group">
               <label for="email-doador">Email</label>
               <input type="email" id="email-doador" name="email-doador" placeholder="seu@email.com" required>
@@ -93,7 +101,10 @@
             <button type="submit" class="btn-login">Entrar como Doador</button>
           </form>
 
-          <form class="login-form" id="form-ong" action="#" method="POST">
+          <form class="login-form <?= $tipoLogin === 'ong' ? 'active' : '' ?>" id="form-ong" action="#" method="POST">
+            <?php if ($erroLogin && $tipoLogin === 'ong'): ?>
+              <p class="login-error" role="alert">E-mail ou senha incorretos.</p>
+            <?php endif; ?>
             <div class="form-group">
               <label for="email-ong">Email</label>
               <input type="email" id="email-ong" name="email-ong" placeholder="contato@ong.com.br" required>

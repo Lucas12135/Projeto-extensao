@@ -3,6 +3,7 @@ require_once __DIR__ . "/../../BD/conexao.php";
 require_once __DIR__ . "/cadastrarOng.php";
 require_once __DIR__ . "/cadastrarDoador.php";
 require_once __DIR__ . "/uploadImagem.php";
+require_once __DIR__ . "/validarDocumentos.php";
 
 function campo(string $nome, $default = null)
 {
@@ -61,6 +62,10 @@ function processarCadastro(PDO $conexao): ?array
                 'uf'           => strtoupper($ufOng)
             ]
         ];
+
+        if (!validarCnpj($dados['cnpj'])) {
+            return ['sucesso' => false, 'mensagem' => 'Informe um CNPJ válido.', 'id' => null];
+        }
 
         if ($dados['senha'] !== campo('confirmar-senha') || campo('agreement') === null) {
             return ['sucesso' => false, 'mensagem' => 'Confirme a senha e aceite os termos.', 'id' => null];
@@ -121,6 +126,10 @@ function processarCadastro(PDO $conexao): ?array
         ],
         'senha'    => campo('senha-doador')
     ];
+
+    if (!validarCpf($dados['cpf'])) {
+        return ['sucesso' => false, 'mensagem' => 'Informe um CPF válido.', 'id' => null];
+    }
 
     if ($dados['senha'] !== campo('confirmar-senha') || campo('agreement') === null) {
         return ['sucesso' => false, 'mensagem' => 'Confirme a senha e aceite os termos.', 'id' => null];

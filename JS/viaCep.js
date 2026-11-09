@@ -10,6 +10,11 @@ function configurarBuscaCep(sufixo) {
   const mensagemModal = document.getElementById(`cep-info-message-${sufixo}`);
   const detalhesModal = document.getElementById(`cep-info-details-${sufixo}`);
   const botaoFecharModal = modal?.querySelector(".cep-info-close");
+  const atualizarStatusCep = (mensagem, estado = "") => {
+    statusCep.textContent = mensagem;
+    statusCep.classList.toggle("cep-status-sucesso", estado === "sucesso");
+    statusCep.classList.toggle("cep-status-erro", estado === "erro");
+  };
   const camposEndereco = {
     logradouro: document.getElementById(`logradouro-${sufixo}`),
     bairro: document.getElementById(`bairro-${sufixo}`),
@@ -42,7 +47,7 @@ function configurarBuscaCep(sufixo) {
   const consultarCep = async (mostrarNoModal = false) => {
     const cep = campoCep.value.replace(/\D/g, "");
     if (cep.length !== 8) {
-      statusCep.textContent = "Informe um CEP com 8 números.";
+      atualizarStatusCep("Informe um CEP com 8 números.", "erro");
       if (mostrarNoModal) {
         mostrarErroModal("Informe um CEP válido com 8 números para consultar.");
       }
@@ -51,7 +56,7 @@ function configurarBuscaCep(sufixo) {
 
     consultaAtual?.abort();
     consultaAtual = new AbortController();
-    statusCep.textContent = "Buscando endereço...";
+    atualizarStatusCep("Buscando endereço...");
     if (mostrarNoModal) {
       mostrarErroModal("Buscando endereço...");
     }
@@ -69,7 +74,7 @@ function configurarBuscaCep(sufixo) {
         return;
       }
       if (endereco.erro) {
-        statusCep.textContent = "CEP não encontrado. Confira o número e tente novamente.";
+        atualizarStatusCep("CEP não encontrado. Confira o número e tente novamente.", "erro");
         if (mostrarNoModal) {
           mostrarErroModal("CEP não encontrado. Confira o número e tente novamente.");
         }
@@ -80,7 +85,7 @@ function configurarBuscaCep(sufixo) {
       camposEndereco.bairro.value = endereco.bairro || "";
       camposEndereco.uf.value = endereco.uf || "";
       camposEndereco.cidade.value = endereco.localidade || "";
-      statusCep.textContent = "Endereço preenchido. Informe o número e o complemento, se houver.";
+      atualizarStatusCep("Endereço preenchido. Informe o número e o complemento, se houver.", "sucesso");
       if (mostrarNoModal) {
         atualizarDetalhesModal(endereco);
       }
@@ -88,7 +93,7 @@ function configurarBuscaCep(sufixo) {
       if (erro.name === "AbortError") {
         return;
       }
-      statusCep.textContent = "Não foi possível buscar o CEP. Preencha o endereço manualmente.";
+      atualizarStatusCep("Não foi possível buscar o CEP. Preencha o endereço manualmente.", "erro");
       if (mostrarNoModal) {
         mostrarErroModal("Não foi possível buscar o CEP. Verifique sua conexão e tente novamente.");
       }
@@ -101,7 +106,7 @@ function configurarBuscaCep(sufixo) {
       ? `${numeros.slice(0, 5)}-${numeros.slice(5)}`
       : numeros;
     consultaAtual?.abort();
-    statusCep.textContent = '';
+    atualizarStatusCep("");
     if (detalhesModal) {
       detalhesModal.hidden = true;
     }
