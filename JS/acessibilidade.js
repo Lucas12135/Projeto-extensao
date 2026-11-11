@@ -5,6 +5,9 @@
   const status = document.getElementById("accessibility-status");
   const options = document.querySelectorAll(".accessibility-option");
   const sliders = document.querySelectorAll(".accessibility-slider");
+  const tabs = document.querySelectorAll(".accessibility-tab");
+  const tabPanels = document.querySelectorAll(".accessibility-tab-panel");
+  const colorModeSelect = document.getElementById("accessibility-color-blind-mode");
   const widget = toggleButton?.closest(".accessibility-widget");
 
   if (
@@ -16,14 +19,30 @@
     options.length === 0 ||
     Array.from(options).some((option) => !(option instanceof HTMLButtonElement)) ||
     sliders.length !== 3 ||
-    Array.from(sliders).some((slider) => !(slider instanceof HTMLInputElement))
+    Array.from(sliders).some((slider) => !(slider instanceof HTMLInputElement)) ||
+    tabs.length !== 2 ||
+    Array.from(tabs).some((tab) => !(tab instanceof HTMLButtonElement)) ||
+    tabPanels.length !== 2 ||
+    Array.from(tabPanels).some((tabPanel) => !(tabPanel instanceof HTMLElement)) ||
+    !(colorModeSelect instanceof HTMLSelectElement)
   ) {
     throw new Error("Não foi possível inicializar as opções de acessibilidade.");
   }
 
   const root = document.documentElement;
-  const storageKey = "reune-accessibility-settings";
+  const cookieKey = "reune-accessibility-settings";
+  const cookieMaxAge = 60 * 60 * 24 * 365;
   const alignmentStates = ["padrão", "à esquerda", "centralizado", "à direita"];
+  const colorBlindModes = {
+    none: "",
+    protanopia: "accessibility-color-blind-protanopia",
+    protanomaly: "accessibility-color-blind-protanomaly",
+    deuteranopia: "accessibility-color-blind-deuteranopia",
+    deuteranomaly: "accessibility-color-blind-deuteranomaly",
+    tritanopia: "accessibility-color-blind-tritanopia",
+    tritanomaly: "accessibility-color-blind-tritanomaly",
+    achromatopsia: "accessibility-color-blind-achromatopsia",
+  };
   const featureClasses = {
     contrast: "accessibility-high-contrast",
     links: "accessibility-highlight-links",
@@ -73,51 +92,93 @@
     lineHeight: 1.6,
     toolbarPinned: false,
     alignmentIndex: 0,
+    colorBlindMode: "none",
+  };
+
+  const getCookie = (name) => {
+    const prefix = `${encodeURIComponent(name)}=`;
+    const cookie = document.cookie
+      .split(";")
+      .map((part) => part.trim())
+      .find((part) => part.startsWith(prefix));
+    return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : null;
+  };
+
+  const setCookie = (name, value) => {
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; Max-Age=${cookieMaxAge}; Path=/; SameSite=Lax${secure}`;
+    if (getCookie(name) !== value) {
+      throw new Error("O navegador não aceitou o cookie de preferências.");
+    }
   };
 
   const saveSettings = () => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(settings));
+      setCookie(cookieKey, JSON.stringify(settings));
+      return true;
     } catch (error) {
       console.error("Não foi possível salvar as preferências de acessibilidade.", error);
       status.textContent = "As alterações foram aplicadas, mas não puderam ser salvas neste navegador.";
+      return false;
+    }
+  };
+
+  const loadSettings = (savedSettings) => {
+    const parsedSettings = JSON.parse(savedSettings);
+    if (parsedSettings && typeof parsedSettings === "object") {
+      Object.keys(featureClasses).forEach((feature) => {
+        if (typeof parsedSettings[feature] === "boolean") {
+          settings[feature] = parsedSettings[feature];
+        }
+      });
+      Object.entries(sliderSettings).forEach(([setting, config]) => {
+        const value = parsedSettings[setting];
+        if (typeof value === "number" && value >= config.min && value <= config.max) {
+          settings[setting] = value;
+        }
+      });
+      if (typeof parsedSettings["large-text"] === "boolean") {
+        settings.textScale = parsedSettings["large-text"] ? 120 : 100;
+      }
+      if (typeof parsedSettings["text-spacing"] === "boolean") {
+        settings.textSpacing = parsedSettings["text-spacing"] ? 0.12 : 0;
+      }
+      if (typeof parsedSettings["line-height"] === "boolean") {
+        settings.lineHeight = parsedSettings["line-height"] ? 1.8 : 1.6;
+      }
+      if (typeof parsedSettings.toolbarPinned === "boolean") {
+        settings.toolbarPinned = parsedSettings.toolbarPinned;
+      }
+      if (
+        Number.isInteger(parsedSettings.alignmentIndex) &&
+        parsedSettings.alignmentIndex >= 0 &&
+        parsedSettings.alignmentIndex < alignmentStates.length
+      ) {
+        settings.alignmentIndex = parsedSettings.alignmentIndex;
+      }
+      if (
+        typeof parsedSettings.colorBlindMode === "string" &&
+        Object.prototype.hasOwnProperty.call(colorBlindModes, parsedSettings.colorBlindMode)
+      ) {
+        settings.colorBlindMode = parsedSettings.colorBlindMode;
+      }
     }
   };
 
   try {
-    const savedSettings = localStorage.getItem(storageKey);
+    const savedSettings = getCookie(cookieKey);
     if (savedSettings !== null) {
-      const parsedSettings = JSON.parse(savedSettings);
-      if (parsedSettings && typeof parsedSettings === "object") {
-        Object.keys(featureClasses).forEach((feature) => {
-          if (typeof parsedSettings[feature] === "boolean") {
-            settings[feature] = parsedSettings[feature];
+      loadSettings(savedSettings);
+    } else {
+      const legacySettings = localStorage.getItem(cookieKey);
+      if (legacySettings !== null) {
+        loadSettings(legacySettings);
+        if (saveSettings()) {
+          try {
+            localStorage.removeItem(cookieKey);
+          } catch (error) {
+            console.error("Não foi possível remover as preferências antigas do navegador.", error);
           }
-        });
-        Object.entries(sliderSettings).forEach(([setting, config]) => {
-          const value = parsedSettings[setting];
-          if (typeof value === "number" && value >= config.min && value <= config.max) {
-            settings[setting] = value;
-          }
-        });
-        if (typeof parsedSettings["large-text"] === "boolean") {
-          settings.textScale = parsedSettings["large-text"] ? 120 : 100;
-        }
-        if (typeof parsedSettings["text-spacing"] === "boolean") {
-          settings.textSpacing = parsedSettings["text-spacing"] ? 0.12 : 0;
-        }
-        if (typeof parsedSettings["line-height"] === "boolean") {
-          settings.lineHeight = parsedSettings["line-height"] ? 1.8 : 1.6;
-        }
-        if (typeof parsedSettings.toolbarPinned === "boolean") {
-          settings.toolbarPinned = parsedSettings.toolbarPinned;
-        }
-        if (
-          Number.isInteger(parsedSettings.alignmentIndex) &&
-          parsedSettings.alignmentIndex >= 0 &&
-          parsedSettings.alignmentIndex < alignmentStates.length
-        ) {
-          settings.alignmentIndex = parsedSettings.alignmentIndex;
         }
       }
     }
@@ -140,6 +201,11 @@
       `${(settings.textSpacing * 1.33).toFixed(2)}em`,
     );
     root.style.setProperty("--accessibility-line-height", String(settings.lineHeight));
+    Object.entries(colorBlindModes).forEach(([mode, className]) => {
+      if (className) {
+        root.classList.toggle(className, settings.colorBlindMode === mode);
+      }
+    });
 
     sliders.forEach((slider) => {
       const setting = slider.dataset.setting;
@@ -151,6 +217,8 @@
         output.value = config.format(settings[setting]);
       }
     });
+
+    colorModeSelect.value = settings.colorBlindMode;
 
     root.classList.remove(
       "accessibility-align-left",
@@ -201,6 +269,48 @@
       };
       status.textContent = labels[setting];
     });
+  });
+
+  const activateTab = (tab, moveFocus = false) => {
+    tabs.forEach((currentTab) => {
+      const isSelected = currentTab === tab;
+      currentTab.setAttribute("aria-selected", String(isSelected));
+      currentTab.tabIndex = isSelected ? 0 : -1;
+      const panel = document.getElementById(currentTab.getAttribute("aria-controls"));
+      panel.hidden = !isSelected;
+    });
+    if (moveFocus) {
+      tab.focus();
+    }
+  };
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => activateTab(tab));
+    tab.addEventListener("keydown", (event) => {
+      let nextIndex;
+      if (event.key === "ArrowRight") {
+        nextIndex = (index + 1) % tabs.length;
+      } else if (event.key === "ArrowLeft") {
+        nextIndex = (index - 1 + tabs.length) % tabs.length;
+      } else if (event.key === "Home") {
+        nextIndex = 0;
+      } else if (event.key === "End") {
+        nextIndex = tabs.length - 1;
+      } else {
+        return;
+      }
+      event.preventDefault();
+      activateTab(tabs[nextIndex], true);
+    });
+  });
+
+  colorModeSelect.addEventListener("change", () => {
+    settings.colorBlindMode = colorModeSelect.value;
+    applySettings();
+    status.textContent = settings.colorBlindMode === "none"
+      ? "Modo de daltonismo desativado."
+      : `Modo ${colorModeSelect.selectedOptions[0].textContent} ativado.`;
+    saveSettings();
   });
 
   applySettings();
@@ -286,6 +396,7 @@
     Object.entries(sliderSettings).forEach(([setting, config]) => {
       settings[setting] = config.defaultValue;
     });
+    settings.colorBlindMode = "none";
     settings.alignmentIndex = 0;
     settings.toolbarPinned = false;
     applySettings();
