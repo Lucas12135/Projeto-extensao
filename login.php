@@ -2,14 +2,46 @@
   require_once __DIR__ .  "/BD/conexao.php";
   session_start();
   $erroLogin = false;
-  $tipoLogin = 'doador';
+  $tipoLogin = isset($_COOKIE['reune_remember_login_type']) &&
+    $_COOKIE['reune_remember_login_type'] === 'ong' ? 'ong' : 'doador';
+  $emailDoador = '';
+  $emailOng = '';
+  $rememberLogin = false;
+  $updateRememberedLogin = static function ($email, $type): void {
+    $cookieOptions = [
+      'expires' => $email === null ? time() - 3600 : time() + 60 * 60 * 24 * 365,
+      'path' => '/',
+      'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+      'httponly' => true,
+      'samesite' => 'Lax',
+    ];
+    setcookie('reune_remember_login_email', $email ?? '', $cookieOptions);
+    setcookie('reune_remember_login_type', $type ?? '', $cookieOptions);
+  };
+
+  if (
+    isset($_COOKIE['reune_remember_login_email']) &&
+    filter_var($_COOKIE['reune_remember_login_email'], FILTER_VALIDATE_EMAIL)
+  ) {
+    if ($tipoLogin === 'ong') {
+      $emailOng = $_COOKIE['reune_remember_login_email'];
+    } else {
+      $emailDoador = $_COOKIE['reune_remember_login_email'];
+    }
+    $rememberLogin = true;
+  }
+
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipoLogin = isset($_POST['email-ong']) ? 'ong' : 'doador';
-    $emailDoador = isset($_POST['email-doador']) ? $_POST['email-doador'] : null;
+    $emailDoador = isset($_POST['email-doador']) ? trim($_POST['email-doador']) : '';
     $senhaDoador = isset($_POST['senha-doador']) ? $_POST['senha-doador'] : null;
 
-    $emailOng = isset($_POST['email-ong']) ? $_POST['email-ong'] : null;
+    $emailOng = isset($_POST['email-ong']) ? trim($_POST['email-ong']) : '';
     $senhaOng = isset($_POST['senha-ong']) ? $_POST['senha-ong'] : null;
+    $rememberLogin = isset($_POST['remember']);
+    if (!$rememberLogin) {
+      $updateRememberedLogin(null, null);
+    }
     
     if ($tipoLogin === 'doador') {
       $smnt=$conexao->prepare("SELECT nm_email_doador, pw_doador FROM DOADOR WHERE nm_email_doador = :email");
@@ -19,6 +51,9 @@
 
       if ($usuario && password_verify($senhaDoador, $usuario['pw_doador'])) {
         $_SESSION['email-doador'] = $usuario['nm_email_doador'];
+        if ($rememberLogin) {
+          $updateRememberedLogin($usuario['nm_email_doador'], 'doador');
+        }
         header("Location: index.php");
         exit;
       } else {
@@ -33,6 +68,9 @@
 
       if ($usuario && password_verify($senhaOng, $usuario['pw_ong'])) {
         $_SESSION['email-ong'] = $usuario['nm_email_ong'];
+        if ($rememberLogin) {
+          $updateRememberedLogin($usuario['nm_email_ong'], 'ong');
+        }
         header("Location: index.php");
         exit;
       } else {
@@ -82,7 +120,7 @@
             <?php endif; ?>
             <div class="form-group">
               <label for="email-doador">Email</label>
-              <input type="email" id="email-doador" name="email-doador" placeholder="seu@email.com" required>
+              <input type="email" id="email-doador" name="email-doador" placeholder="seu@email.com" value="<?= htmlspecialchars($emailDoador, ENT_QUOTES, 'UTF-8') ?>" required>
             </div>
 
             <div class="form-group">
@@ -92,7 +130,7 @@
 
             <div class="form-actions">
               <label class="remember-me">
-                <input type="checkbox" name="remember">
+                <input type="checkbox" name="remember" <?= $tipoLogin === 'doador' && $rememberLogin ? 'checked' : '' ?>>
                 Lembrar-me
               </label>
               <a href="#" class="forgot-password">Esqueceu a senha?</a>
@@ -107,7 +145,7 @@
             <?php endif; ?>
             <div class="form-group">
               <label for="email-ong">Email</label>
-              <input type="email" id="email-ong" name="email-ong" placeholder="contato@ong.com.br" required>
+              <input type="email" id="email-ong" name="email-ong" placeholder="contato@ong.com.br" value="<?= htmlspecialchars($emailOng, ENT_QUOTES, 'UTF-8') ?>" required>
             </div>
 
             <div class="form-group">
@@ -117,7 +155,7 @@
 
             <div class="form-actions">
               <label class="remember-me">
-                <input type="checkbox" name="remember">
+                <input type="checkbox" name="remember" <?= $tipoLogin === 'ong' && $rememberLogin ? 'checked' : '' ?>>
                 Lembrar-me
               </label>
               <a href="#" class="forgot-password">Esqueceu a senha?</a>

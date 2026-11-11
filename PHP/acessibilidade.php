@@ -1,7 +1,15 @@
 <div class="accessibility-widget">
     <section class="accessibility-panel" id="accessibility-panel" aria-labelledby="accessibility-title" hidden>
         <h2 id="accessibility-title">Opções de acessibilidade</h2>
-        <div class="accessibility-controls">
+        <div class="accessibility-tabs" role="tablist" aria-label="Seções do menu de acessibilidade">
+            <button type="button" class="accessibility-tab" id="accessibility-tab-general" role="tab" aria-selected="true" aria-controls="accessibility-general-panel" tabindex="0">
+                Acessibilidade
+            </button>
+            <button type="button" class="accessibility-tab" id="accessibility-tab-color-blind" role="tab" aria-selected="false" aria-controls="accessibility-color-blind-panel" tabindex="-1">
+                Daltonismo
+            </button>
+        </div>
+        <div class="accessibility-controls accessibility-tab-panel" id="accessibility-general-panel" role="tabpanel" aria-labelledby="accessibility-tab-general" tabindex="0">
             <div class="accessibility-slider-option">
                 <label class="accessibility-slider-label" for="accessibility-text-scale">
                     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2 5h10v2H8v12H6V7H2V5Zm13 5h7v2h-2.5v7h-2v-7H15v-2Z"/></svg>
@@ -59,17 +67,57 @@
                 <span>Libras (VLibras)</span>
             </button>
         </div>
+        <div class="accessibility-tab-panel" id="accessibility-color-blind-panel" role="tabpanel" aria-labelledby="accessibility-tab-color-blind" tabindex="0" hidden>
+            <p>As opções abaixo aplicam simulações aproximadas de diferentes percepções de cores.</p>
+            <div class="accessibility-color-option accessibility-color-mode">
+                <label for="accessibility-color-blind-mode">Tipo de daltonismo</label>
+                <select id="accessibility-color-blind-mode" class="accessibility-color-select">
+                    <option value="none">Nenhum</option>
+                    <option value="protanopia">Protanopia</option>
+                    <option value="protanomaly">Protanomalia</option>
+                    <option value="deuteranopia">Deuteranopia</option>
+                    <option value="deuteranomaly">Deuteranomalia</option>
+                    <option value="tritanopia">Tritanopia</option>
+                    <option value="tritanomaly">Tritanomalia</option>
+                    <option value="achromatopsia">Acromatopsia</option>
+                </select>
+            </div>
+        </div>
         <div class="accessibility-panel-footer">
             <p class="accessibility-status" id="accessibility-status" aria-live="polite">Selecione uma opção para personalizar a página.</p>
             <button type="button" class="accessibility-reset" id="reset-accessibility">Restaurar padrão</button>
         </div>
     </section>
+    <svg class="accessibility-color-filters" aria-hidden="true" focusable="false">
+        <filter id="accessibility-protanopia">
+            <feColorMatrix type="matrix" values="0.567 0.433 0 0 0 0.558 0.442 0 0 0 0 0.242 0.758 0 0 0 0 0 1 0"/>
+        </filter>
+        <filter id="accessibility-protanomaly">
+            <feColorMatrix type="matrix" values="0.7835 0.2165 0 0 0 0.279 0.721 0 0 0 0 0.121 0.879 0 0 0 0 0 1 0"/>
+        </filter>
+        <filter id="accessibility-deuteranopia">
+            <feColorMatrix type="matrix" values="0.625 0.375 0 0 0 0.7 0.3 0 0 0 0 0.3 0.7 0 0 0 0 0 1 0"/>
+        </filter>
+        <filter id="accessibility-deuteranomaly">
+            <feColorMatrix type="matrix" values="0.8125 0.1875 0 0 0 0.35 0.65 0 0 0 0 0.15 0.85 0 0 0 0 0 1 0"/>
+        </filter>
+        <filter id="accessibility-tritanopia">
+            <feColorMatrix type="matrix" values="0.95 0.05 0 0 0 0 0.433 0.567 0 0 0 0.475 0.525 0 0 0 0 0 1 0"/>
+        </filter>
+        <filter id="accessibility-tritanomaly">
+            <feColorMatrix type="matrix" values="0.975 0.025 0 0 0 0 0.7165 0.2835 0 0 0 0.2375 0.7625 0 0 0 0 0 1 0"/>
+        </filter>
+        <filter id="accessibility-achromatopsia">
+            <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0 0 0 1 0"/>
+        </filter>
+    </svg>
     <button
         type="button"
         class="accessibility-toggle"
         id="accessibility-toggle"
         aria-controls="accessibility-panel"
         aria-expanded="false"
+        aria-label="Menu de acessibilidade"
     >
         <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
             <path d="M12 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 6H5a1 1 0 0 0 0 2h5v11a1 1 0 0 0 2 0v-6h1v6a1 1 0 0 0 2 0V10h4a1 1 0 0 0 0-2Z"/>

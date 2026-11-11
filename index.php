@@ -31,6 +31,8 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Plataforma digital para facilitar a doação e distribuição de alimentos">
+  <meta name="keywords" content="doação, alimentos, ONGs, voluntariado, impacto social">
   <title>REUNE+</title>
   <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
   <link rel="stylesheet" href="style.css">
