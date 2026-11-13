@@ -53,8 +53,15 @@ $camposEndereco = [
 ];
 $camposPerfil = array_merge($campos, $camposEndereco);
 
-$mensagem = null;
-$sucesso = false;
+if (!isset($_SESSION["token_status_doacao"])) {
+    $_SESSION["token_status_doacao"] = bin2hex(random_bytes(32));
+}
+if (!isset($_SESSION["token_excluir_conta"])) {
+    $_SESSION["token_excluir_conta"] = bin2hex(random_bytes(32));
+}
+$mensagem = $_SESSION["mensagem_perfil"] ?? null;
+$sucesso = $_SESSION["sucesso_perfil"] ?? false;
+unset($_SESSION["mensagem_perfil"], $_SESSION["sucesso_perfil"]);
 
 // Processa a alteração de um campo ou da foto.
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -197,6 +204,58 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $mensagem = "Não foi possível atualizar a foto. Tente novamente.";
             }
         }
+    } elseif ($acao === "atualizar_status_doacao") {
+        $idDoacaoInformado = $_POST["doacao_id"] ?? null;
+        $idDoacao = is_string($idDoacaoInformado)
+            ? filter_var($idDoacaoInformado, FILTER_VALIDATE_INT, [
+                "options" => ["min_range" => 1],
+            ])
+            : false;
+        $novoStatus = $_POST["status"] ?? null;
+        $tokenInformado = $_POST["token_status_doacao"] ?? null;
+
+        if (!$isOng) {
+            $mensagem = "Somente a ONG pode atualizar o status desta doação.";
+        } elseif (
+            !is_string($tokenInformado) ||
+            !hash_equals($_SESSION["token_status_doacao"], $tokenInformado)
+        ) {
+            $mensagem = "Não foi possível validar a solicitação. Atualize a página e tente novamente.";
+        } elseif (
+            $idDoacao === false ||
+            !in_array($novoStatus, ["Finalizada", "Rejeitada"], true)
+        ) {
+            $mensagem = "A ação solicitada para a doação é inválida.";
+        } else {
+            try {
+                $atualizacaoStatus = $conexao->prepare(
+                    "UPDATE DOACAO
+                     SET nm_status_doacao = :status
+                     WHERE id_DOACAO = :id
+                       AND ONG_id_ONG = (
+                           SELECT id_ONG FROM ONG WHERE nm_email_ong = :email
+                       )
+                       AND nm_status_doacao = 'Pendente'"
+                );
+                $atualizacaoStatus->execute([
+                    ":status" => $novoStatus,
+                    ":id" => $idDoacao,
+                    ":email" => $emailSessao,
+                ]);
+
+                if ($atualizacaoStatus->rowCount() === 1) {
+                    $_SESSION["mensagem_perfil"] = "Status da doação atualizado para $novoStatus.";
+                    $_SESSION["sucesso_perfil"] = true;
+                    header("Location: perfil.php#profile-donations");
+                    exit;
+                }
+
+                $mensagem = "A doação não está pendente ou não pertence à sua ONG.";
+            } catch (PDOException $erro) {
+                error_log("Erro ao atualizar status da doação: " . $erro->getMessage());
+                $mensagem = "Não foi possível atualizar o status da doação. Tente novamente.";
+            }
+        }
     } else {
         $mensagem = "Ação de edição inválida.";
     }
@@ -230,9 +289,46 @@ if (!$perfil) {
     exit;
 }
 
+$consultaDoacoes = $conexao->prepare(
+    $isOng
+        ? "SELECT doacao.id_DOACAO, doador.nm_doador AS nome_contraparte, doacao.nm_tipo_doacao,
+                  doacao.ds_doacao, doacao.nm_status_doacao, doacao.dt_doacao
+           FROM DOACAO doacao
+           INNER JOIN ONG ong ON ong.id_ONG = doacao.ONG_id_ONG
+           INNER JOIN DOADOR doador ON doador.id_Doador = doacao.DOADOR_id_Doador
+           WHERE ong.nm_email_ong = :email
+           ORDER BY doacao.id_DOACAO DESC"
+        : "SELECT doacao.id_DOACAO, ong.nm_ong AS nome_contraparte, doacao.nm_tipo_doacao,
+                  doacao.ds_doacao, doacao.nm_status_doacao, doacao.dt_doacao
+           FROM DOACAO doacao
+           INNER JOIN DOADOR doador ON doador.id_Doador = doacao.DOADOR_id_Doador
+           INNER JOIN ONG ong ON ong.id_ONG = doacao.ONG_id_ONG
+           WHERE doador.nm_email_doador = :email
+           ORDER BY doacao.id_DOACAO DESC"
+);
+$consultaDoacoes->execute([":email" => $emailSessao]);
+$doacoesPerfil = $consultaDoacoes->fetchAll(PDO::FETCH_ASSOC);
+$podeExcluirConta = true;
+foreach ($doacoesPerfil as $doacaoPerfil) {
+    if (($doacaoPerfil["nm_status_doacao"] ?? null) !== "Finalizada") {
+        $podeExcluirConta = false;
+        break;
+    }
+}
+
 function escaparPerfil(string $valor): string
 {
     return htmlspecialchars($valor, ENT_QUOTES, "UTF-8");
+}
+
+function formatarDataDoacao(?string $data): string
+{
+    if ($data === null || $data === "") {
+        return "Data não informada";
+    }
+
+    $dataFormatada = DateTimeImmutable::createFromFormat("!Y-m-d", $data);
+    return $dataFormatada === false ? "Data inválida" : $dataFormatada->format("d/m/Y");
 }
 
 $imagem = $perfil[$colunaImagem] ?: "resource/logo.jpeg";
@@ -245,7 +341,7 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="CSS/perfil.css">
     <title>Meu perfil - REUNE+</title>
 </head>
 
@@ -324,16 +420,58 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
                         </form>
                     <?php endforeach; ?>
                 </div>
+
+                <section class="profile-donations" aria-labelledby="profile-donations-title">
+                    <div class="profile-section-heading">
+                        <div>
+                            <h2 id="profile-donations-title"><?= $isOng ? "Doações recebidas" : "Minhas doações" ?></h2>
+                            <p><?= $isOng ? "Acompanhe as solicitações feitas pelos doadores." : "Acompanhe o status das suas solicitações." ?></p>
+                        </div>
+                    </div>
+                    <?php if ($doacoesPerfil): ?>
+                        <div class="profile-donation-list">
+                            <?php foreach ($doacoesPerfil as $doacao): ?>
+                                <article class="profile-donation-item">
+                                    <h3><?= escaparPerfil((string) $doacao["nome_contraparte"]) ?></h3>
+                                    <p><?= escaparPerfil((string) $doacao["nm_tipo_doacao"]) ?> · Quantidade: <?= (int) $doacao["ds_doacao"] ?></p>
+                                    <p>Status: <?= escaparPerfil((string) $doacao["nm_status_doacao"]) ?> · Data: <?= escaparPerfil(formatarDataDoacao($doacao["dt_doacao"] === null ? null : (string) $doacao["dt_doacao"])) ?></p>
+                                    <?php if ($isOng && $doacao["nm_status_doacao"] === "Pendente"): ?>
+                                        <div class="profile-donation-actions">
+                                            <?php foreach (["Finalizada" => "Finalizar entrega", "Rejeitada" => "Rejeitar entrega"] as $status => $rotulo): ?>
+                                                <form method="POST">
+                                                    <input type="hidden" name="acao" value="atualizar_status_doacao">
+                                                    <input type="hidden" name="token_status_doacao" value="<?= escaparPerfil($_SESSION["token_status_doacao"]) ?>">
+                                                    <input type="hidden" name="doacao_id" value="<?= (int) $doacao["id_DOACAO"] ?>">
+                                                    <input type="hidden" name="status" value="<?= escaparPerfil($status) ?>">
+                                                    <button class="profile-donation-button<?= $status === "Rejeitada" ? " is-reject" : "" ?>" type="submit">
+                                                        <?= escaparPerfil($rotulo) ?>
+                                                    </button>
+                                                </form>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <p class="profile-donations-empty"><?= $isOng ? "Nenhuma doação recebida ainda." : "Você ainda não registrou doações." ?></p>
+                    <?php endif; ?>
+                </section>
+
                 <div class="profile-section-footer">
                     <form class="profile-logout-form" method="POST" action="./PHP/logout.php">
                         <button type="submit" class="profile-logout-button">Sair da conta</button>
                     </form>
-                    <form class="profile-delete-form" method="POST" action="./PHP/excluirConta.php">
-                        <button type="submit" class="profile-delete-button">Excluir conta
+                    <form id="profile-delete-form" class="profile-delete-form" method="POST" action="./PHP/excluirConta.php">
+                        <input type="hidden" name="token_excluir_conta" value="<?= escaparPerfil($_SESSION["token_excluir_conta"]) ?>">
+                        <button type="submit" class="profile-delete-button" formnovalidate <?= $podeExcluirConta ? "" : "disabled" ?>>Excluir conta
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5" />
                             </svg>
                         </button>
+                        <?php if (!$podeExcluirConta): ?>
+                            <p class="profile-delete-notice" role="status">Finalize todas as doações vinculadas antes de excluir sua conta.</p>
+                        <?php endif; ?>
                     </form>
                 </div>
             </section>
@@ -368,10 +506,24 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
                 <h2 id="profile-delete-title">Excluir conta?</h2>
                 <button type="button" class="profile-modal-close" data-profile-modal-close aria-label="Fechar">&times;</button>
             </div>
-            <p>Esta ação é permanente. Seus dados de conta serão excluídos e não poderão ser recuperados.</p>
+            <p>Esta ação é permanente. A conta, as doações finalizadas e as entregas vinculadas serão excluídas. Todas as doações precisam estar finalizadas para continuar.</p>
+            <label class="profile-modal-label" for="profile-delete-confirmation">
+                Digite <strong>CONFIRMAR</strong> para habilitar a exclusão
+            </label>
+            <input
+                id="profile-delete-confirmation"
+                class="profile-modal-input"
+                type="text"
+                name="confirmacao"
+                form="profile-delete-form"
+                placeholder="CONFIRMAR"
+                autocomplete="off"
+                maxlength="9"
+                pattern="CONFIRMAR"
+                required>
             <div class="profile-modal-actions">
                 <button type="button" class="profile-modal-button profile-modal-cancel" data-profile-modal-close>Manter minha conta</button>
-                <button type="button" class="profile-modal-button profile-modal-confirm" data-confirm-form="profile-delete-form">Excluir conta</button>
+                <button type="button" class="profile-modal-button profile-modal-confirm" id="profile-delete-confirm" data-confirm-form="profile-delete-form" disabled>Excluir conta</button>
             </div>
         </dialog>
     </main>

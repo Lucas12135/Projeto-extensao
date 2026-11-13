@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro - REUNE+</title>
   <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="CSS/cadastro.css">
 </head>
 <body class="signup-page">
   <main>

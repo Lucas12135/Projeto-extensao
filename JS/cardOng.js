@@ -13,6 +13,11 @@ if (ongsList) {
       item.setAttribute('aria-pressed', selected);
     });
 
+    const donationOngId = document.getElementById('donation-ong-id');
+    if (donationOngId) {
+      donationOngId.value = card.dataset.id;
+    }
+
     document.getElementById('detailsName').textContent = card.dataset.nome;
     document.getElementById('detailsImage').src = card.dataset.imagem;
     document.getElementById('detailsLocation').textContent = card.dataset.localizacao || 'Não informada';

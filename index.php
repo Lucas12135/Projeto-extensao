@@ -35,7 +35,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
   <meta name="keywords" content="doação, alimentos, ONGs, voluntariado, impacto social">
   <title>REUNE+</title>
   <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="CSS/index.css">
 
 </head>
 
