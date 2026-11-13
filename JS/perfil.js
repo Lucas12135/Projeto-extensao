@@ -85,13 +85,23 @@
     const form = document.querySelector(`.${formClass}`);
     const modal = document.getElementById(modalId);
     const confirmButton = modal?.querySelector(`[data-confirm-form="${formClass}"]`);
+    const confirmationInput = formClass === "profile-delete-form"
+      ? document.getElementById("profile-delete-confirmation")
+      : null;
 
     if (
       !(form instanceof HTMLFormElement) ||
       !(modal instanceof HTMLDialogElement) ||
-      !(confirmButton instanceof HTMLButtonElement)
+      !(confirmButton instanceof HTMLButtonElement) ||
+      (confirmationInput !== null && !(confirmationInput instanceof HTMLInputElement))
     ) {
       throw new Error(`Não foi possível inicializar a confirmação: ${formClass}.`);
+    }
+
+    if (confirmationInput instanceof HTMLInputElement) {
+      confirmationInput.addEventListener("input", () => {
+        confirmButton.disabled = confirmationInput.value !== "CONFIRMAR";
+      });
     }
 
     let confirmed = false;
@@ -101,10 +111,26 @@
         return;
       }
       event.preventDefault();
+      if (modal.open) {
+        return;
+      }
+      if (confirmationInput instanceof HTMLInputElement) {
+        confirmationInput.value = "";
+        confirmButton.disabled = true;
+      }
       modal.showModal();
+      if (confirmationInput instanceof HTMLInputElement) {
+        confirmationInput.focus();
+      }
     });
 
     confirmButton.addEventListener("click", () => {
+      if (
+        confirmationInput instanceof HTMLInputElement &&
+        confirmationInput.value !== "CONFIRMAR"
+      ) {
+        return;
+      }
       confirmed = true;
       modal.close();
       form.requestSubmit();

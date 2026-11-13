@@ -3,15 +3,120 @@ session_start();
 require_once __DIR__ . "/BD/conexao.php";
 require_once __DIR__ . "/BD/criarTabelas.php";
 
+$isOng = isset($_SESSION["email-ong"]) &&
+  is_string($_SESSION["email-ong"]) &&
+  $_SESSION["email-ong"] !== "";
+$isDoador = !$isOng &&
+  isset($_SESSION["email-doador"]) &&
+  is_string($_SESSION["email-doador"]) &&
+  $_SESSION["email-doador"] !== "";
+if (!isset($_SESSION["token_doacao"])) {
+  $_SESSION["token_doacao"] = bin2hex(random_bytes(32));
+}
+
+$mensagemDoacao = $_SESSION["mensagem_doacao"] ?? null;
+$sucessoDoacao = $_SESSION["sucesso_doacao"] ?? false;
+unset($_SESSION["mensagem_doacao"], $_SESSION["sucesso_doacao"]);
+$tipoDoacao = "";
+$quantidadeDoacao = "";
+$ongSelecionadaId = filter_input(INPUT_GET, "ong", FILTER_VALIDATE_INT) ?: null;
+
 $smnt = $conexao->prepare(
-  "SELECT nm_ong, nm_email_ong, cd_telefone_ong, cd_distancia_km,
+  "SELECT id_ONG, nm_ong, nm_email_ong, cd_telefone_ong, cd_distancia_km,
           ds_doacoes, ds_sobre, ds_missao, ds_projetos, ds_localizacao, nm_imagem_ong
    FROM ONG
    ORDER BY nm_ong"
 );
 $smnt->execute();
 $ongs = $smnt->fetchAll(PDO::FETCH_ASSOC);
-$ongSelecionada = $ongs[0] ?? null;
+$ongSelecionada = null;
+foreach ($ongs as $ong) {
+  if ((int) $ong["id_ONG"] === $ongSelecionadaId) {
+    $ongSelecionada = $ong;
+    break;
+  }
+}
+$ongSelecionada ??= $ongs[0] ?? null;
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["acao"] ?? "") === "registrar_doacao") {
+  $ongSelecionadaId = filter_input(INPUT_POST, "ong_id", FILTER_VALIDATE_INT) ?: null;
+  $tipoDoacao = trim((string) ($_POST["tipo_doacao"] ?? ""));
+  $quantidadeDoacao = trim((string) ($_POST["quantidade"] ?? ""));
+  $caracteresTipo = preg_match_all("/./us", $tipoDoacao);
+
+  if (!$isDoador) {
+    $mensagemDoacao = "Entre com uma conta de doador para registrar uma doação.";
+  } elseif (
+    !isset($_POST["token_doacao"]) ||
+    !is_string($_POST["token_doacao"]) ||
+    !hash_equals($_SESSION["token_doacao"], $_POST["token_doacao"])
+  ) {
+    $mensagemDoacao = "Não foi possível validar o envio. Atualize a página e tente novamente.";
+  } elseif (
+    $ongSelecionadaId === null ||
+    $tipoDoacao === "" ||
+    $caracteresTipo === false ||
+    $caracteresTipo > 50
+  ) {
+    $mensagemDoacao = "Informe a ONG e o tipo de doação (até 50 caracteres).";
+  } elseif (
+    filter_var($quantidadeDoacao, FILTER_VALIDATE_INT, [
+      "options" => ["min_range" => 1, "max_range" => 2147483647],
+    ]) === false
+  ) {
+    $mensagemDoacao = "Informe uma quantidade inteira maior que zero.";
+  } else {
+    try {
+      $consultaDoador = $conexao->prepare(
+        "SELECT id_Doador FROM DOADOR WHERE nm_email_doador = :email"
+      );
+      $consultaDoador->execute([":email" => $_SESSION["email-doador"]]);
+      $idDoador = $consultaDoador->fetchColumn();
+
+      $consultaOng = $conexao->prepare("SELECT 1 FROM ONG WHERE id_ONG = :id");
+      $consultaOng->execute([":id" => $ongSelecionadaId]);
+
+      if ($idDoador === false) {
+        unset($_SESSION["email-doador"]);
+        header("Location: login.php");
+        exit;
+      }
+
+      if (!$consultaOng->fetchColumn()) {
+        $mensagemDoacao = "A ONG selecionada não foi encontrada.";
+      } else {
+        $insercao = $conexao->prepare(
+          "INSERT INTO DOACAO
+            (ONG_id_ONG, DOADOR_id_Doador, nm_tipo_doacao, ds_doacao, nm_status_doacao, dt_doacao)
+           VALUES
+            (:ong, :doador, :tipo, :quantidade, 'Pendente', CURRENT_DATE)"
+        );
+        $insercao->execute([
+          ":ong" => $ongSelecionadaId,
+          ":doador" => $idDoador,
+          ":tipo" => $tipoDoacao,
+          ":quantidade" => (int) $quantidadeDoacao,
+        ]);
+
+        $_SESSION["mensagem_doacao"] = "Doação registrada com sucesso. A ONG poderá acompanhar sua solicitação.";
+        $_SESSION["sucesso_doacao"] = true;
+        header("Location: ongs.php?ong=" . $ongSelecionadaId . "#ongDetails");
+        exit;
+      }
+    } catch (PDOException $erro) {
+      error_log("Erro ao registrar doação: " . $erro->getMessage());
+      $mensagemDoacao = "Não foi possível registrar a doação. Tente novamente.";
+    }
+  }
+
+  foreach ($ongs as $ong) {
+    if ((int) $ong["id_ONG"] === $ongSelecionadaId) {
+      $ongSelecionada = $ong;
+      break;
+    }
+  }
+}
+
 $escapar = static function ($valor) {
   return htmlspecialchars((string) ($valor ?? ''), ENT_QUOTES, 'UTF-8');
 };
@@ -83,6 +188,12 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
           <p>Encontre organizações parceiras, conheça seus projetos e veja como ajudar.</p>
         </div>
 
+        <?php if ($mensagemDoacao !== null): ?>
+          <p class="donation-notice<?= $sucessoDoacao ? ' is-success' : ' is-error' ?>" role="status">
+            <?= $escapar($mensagemDoacao) ?>
+          </p>
+        <?php endif; ?>
+
         <div class="search-filters">
           <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Pesquisar ONGs..." class="search-input">
@@ -112,10 +223,12 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
                 $distancia = $ong['cd_distancia_km'] ?? '';
                 $doacoes = $ong['ds_doacoes'] ?? '';
                 $imagem = $ong['nm_imagem_ong'] ?: 'resource/logo.jpeg';
+                $selecionada = (int) $ong['id_ONG'] === (int) ($ongSelecionada['id_ONG'] ?? 0);
                 ?>
                 <button
                   type="button"
-                  class="ong-card<?= $indice === 0 ? ' active' : '' ?>"
+                  class="ong-card<?= $selecionada ? ' active' : '' ?>"
+                  data-id="<?= (int) $ong['id_ONG'] ?>"
                   data-nome="<?= $nome ?>"
                   data-imagem="<?= $escapar($imagem) ?>"
                   data-distancia="<?= $escapar($distancia) ?>"
@@ -126,7 +239,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
                   data-localizacao="<?= $escapar($ong['ds_localizacao']) ?>"
                   data-telefone="<?= $escapar($ong['cd_telefone_ong']) ?>"
                   data-email="<?= $escapar($ong['nm_email_ong']) ?>"
-                  aria-pressed="<?= $indice === 0 ? 'true' : 'false' ?>">
+                  aria-pressed="<?= $selecionada ? 'true' : 'false' ?>">
                   <img src="<?= $escapar($imagem) ?>" alt="Logo da ONG">
                   <div class="card-info">
                     <h4><?= $nome ?></h4>
@@ -176,6 +289,27 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
                   <p id="detailsEmail"><?= $escapar($ongSelecionada['nm_email_ong'] ?: 'E-mail não informado') ?></p>
                 </div>
               </div>
+
+              <section class="donation-section" aria-labelledby="donation-title">
+                <h3 id="donation-title">Quero fazer uma doação</h3>
+                <p>Confira as doações aceitas pela ONG antes de enviar sua solicitação. A doação será registrada como pendente para alinhamento com a organização.</p>
+                <?php if ($isDoador): ?>
+                  <form class="donation-form" method="POST">
+                    <input type="hidden" name="acao" value="registrar_doacao">
+                    <input type="hidden" name="token_doacao" value="<?= $escapar($_SESSION['token_doacao']) ?>">
+                    <input type="hidden" name="ong_id" id="donation-ong-id" value="<?= (int) $ongSelecionada['id_ONG'] ?>">
+                    <label for="donation-type">O que deseja doar?</label>
+                    <input id="donation-type" name="tipo_doacao" type="text" maxlength="50" placeholder="Ex.: arroz (kg), roupas (unidades)" value="<?= $escapar($tipoDoacao) ?>" required>
+                    <label for="donation-quantity">Quantidade</label>
+                    <input id="donation-quantity" name="quantidade" type="number" min="1" max="2147483647" value="<?= $escapar($quantidadeDoacao) ?>" required>
+                    <button class="btn btn-primary" type="submit">Registrar doação</button>
+                  </form>
+                <?php elseif (!$isOng): ?>
+                  <p><a class="btn btn-primary donation-login-link" href="login.php">Entre como doador para doar</a></p>
+                <?php else: ?>
+                  <p>Somente contas de doador podem registrar doações.</p>
+                <?php endif; ?>
+              </section>
             <?php else: ?>
               <p class="details-placeholder">Nenhuma ONG cadastrada.</p>
             <?php endif; ?>
@@ -190,7 +324,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>
   </footer>
-  <script src="cardOng.js"></script>
+  <script src="JS/cardOng.js"></script>
 </body>
 
 </html>
