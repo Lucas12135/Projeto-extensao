@@ -341,7 +341,7 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="CSS/perfil.css">
     <title>Meu perfil - REUNE+</title>
 </head>
 

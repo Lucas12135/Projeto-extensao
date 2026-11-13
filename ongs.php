@@ -149,7 +149,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ONGs Parceiras - REUNE+</title>
   <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="CSS/ongs.css">
 </head>
 
 <body>

@@ -32,7 +32,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>REUNE+</title>
   <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="CSS/contato.css">
 </head>
 
 <body>

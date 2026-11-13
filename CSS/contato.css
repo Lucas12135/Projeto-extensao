@@ -1,0 +1,49 @@
+@import url("global.css");
+
+.contact {
+  background: var(--card);
+  border-radius: 32px;
+  margin-top: 20px;
+  padding: 36px;
+  box-shadow: var(--shadow);
+}
+
+.contact-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1.2fr 0.8fr;
+}
+
+.contact-info p,
+.contact-info a {
+  color: var(--muted);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.contact-form {
+  display: grid;
+  gap: 18px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  border: 1px solid var(--field-border);
+  font: inherit;
+  color: var(--text);
+  background: var(--field-background);
+  padding: 16px 18px;
+  border-radius: 16px;
+}
+
+.contact-form textarea {
+  min-height: 170px;
+  resize: vertical;
+}
+
+@media (max-width: 920px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
