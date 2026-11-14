@@ -31,7 +31,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Plataforma digital para facilitar a doação e distribuição de alimentos">
+  <meta name="description" content="Plataforma digital para facilitar a doação.">
   <meta name="keywords" content="doação, alimentos, ONGs, voluntariado, impacto social">
   <title>REUNE+</title>
   <link rel="icon" href="resource/logo.jpeg" type="image/x-icon">
@@ -68,7 +68,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
       <div class="hero">
         <div>
           <p>Conectando doadores, ONGs e voluntários em um só lugar.</p>
-          <h1>Uma plataforma digital para facilitar a doação e distribuição de alimentos.</h1>
+          <h1>Uma plataforma digital para facilitar a doação.</h1>
           <p>O Reune+ é uma plataforma centralizadora que conecta doadores, voluntários e organizações beneficentes, tornando o processo de arrecadação e doação mais organizado, acessível e eficiente.</p>
           <div class="buttons">
             <a class="btn btn-primary" href="login.php">Comece a ajudar</a>
