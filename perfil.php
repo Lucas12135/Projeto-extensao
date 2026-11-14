@@ -2,54 +2,54 @@
 require_once __DIR__ . "/BD/conexao.php";
 require_once __DIR__ . "/BD/criarTabelas.php";
 require_once __DIR__ . "/PHP/FUNCOES/uploadImagem.php";
+require_once __DIR__ . "/PHP/OBJETOS/CampoPerfil.php";
+require_once __DIR__ . "/PHP/OBJETOS/TipoConta.php";
+
+use Reune\Objetos\CampoPerfil;
+use Reune\Objetos\TipoConta;
 
 session_start();
 
 // Descobre quem está conectado e quais dados pertencem a esse tipo de conta.
 $isOng = isset($_SESSION["email-ong"]);
-$emailSessao = $_SESSION[$isOng ? "email-ong" : "email-doador"] ?? null;
+$conta = $isOng ? TipoConta::ong() : TipoConta::doador();
+$emailSessao = $_SESSION[$conta->chaveSessao] ?? null;
 
 if (!is_string($emailSessao) || $emailSessao === "") {
     header("Location: login.php");
     exit;
 }
 
+$tabela = $conta->tabela;
+$colunaId = $conta->colunaId;
+$colunaEnderecoDono = $conta->colunaReferencia;
+$colunaLocalizacao = $conta->colunaLocalizacao;
+$colunaEmail = $conta->colunaEmail;
+$colunaImagem = $conta->colunaImagem;
+$tipoPerfil = $conta->descricaoPerfil;
+
 if ($isOng) {
-    $tabela = "ONG";
-    $colunaId = "id_ONG";
-    $colunaEnderecoDono = "ONG_id_ONG";
-    $colunaLocalizacao = "ds_localizacao";
-    $colunaEmail = "nm_email_ong";
-    $colunaImagem = "nm_imagem_ong";
-    $tipoPerfil = "Perfil da organização";
     $campos = [
-        "nome" => ["label" => "Nome da ONG", "coluna" => "nm_ong", "tipo" => "text", "max" => 30],
-        "email" => ["label" => "E-mail", "coluna" => $colunaEmail, "tipo" => "email", "max" => 50],
-        "telefone" => ["label" => "Telefone", "coluna" => "cd_telefone_ong", "tipo" => "tel", "max" => 20],
-        "doacoes" => ["label" => "Doações aceitas", "coluna" => "ds_doacoes", "tipo" => "textarea"],
-        "sobre" => ["label" => "Sobre", "coluna" => "ds_sobre", "tipo" => "textarea"],
-        "missao" => ["label" => "Missão", "coluna" => "ds_missao", "tipo" => "textarea"],
-        "projetos" => ["label" => "Projetos", "coluna" => "ds_projetos", "tipo" => "textarea"],
-        "cnpj" => ["label" => "CNPJ", "coluna" => "cd_cnpj", "tipo" => "text", "max" => 18],
+        "nome" => new CampoPerfil("Nome da ONG", "nm_ong", "text", 30),
+        "email" => new CampoPerfil("E-mail", $colunaEmail, "email", 50),
+        "telefone" => new CampoPerfil("Telefone", "cd_telefone_ong", "tel", 20),
+        "doacoes" => new CampoPerfil("Doações aceitas", "ds_doacoes", "textarea"),
+        "sobre" => new CampoPerfil("Sobre", "ds_sobre", "textarea"),
+        "missao" => new CampoPerfil("Missão", "ds_missao", "textarea"),
+        "projetos" => new CampoPerfil("Projetos", "ds_projetos", "textarea"),
+        "cnpj" => new CampoPerfil("CNPJ", "cd_cnpj", "text", 18),
     ];
 } else {
-    $tabela = "DOADOR";
-    $colunaId = "id_Doador";
-    $colunaEnderecoDono = "DOADOR_id_Doador";
-    $colunaLocalizacao = "ds_endereco_doador";
-    $colunaEmail = "nm_email_doador";
-    $colunaImagem = "nm_imagem_doador";
-    $tipoPerfil = "Perfil do doador";
     $campos = [
-        "nome" => ["label" => "Nome completo", "coluna" => "nm_doador", "tipo" => "text", "max" => 50],
-        "email" => ["label" => "E-mail", "coluna" => $colunaEmail, "tipo" => "email", "max" => 50],
-        "telefone" => ["label" => "Telefone", "coluna" => "cd_telefone_doador", "tipo" => "tel", "max" => 20],
-        "cpf" => ["label" => "CPF", "coluna" => "cd_cpf_doador", "tipo" => "text", "max" => 14],
+        "nome" => new CampoPerfil("Nome completo", "nm_doador", "text", 50),
+        "email" => new CampoPerfil("E-mail", $colunaEmail, "email", 50),
+        "telefone" => new CampoPerfil("Telefone", "cd_telefone_doador", "tel", 20),
+        "cpf" => new CampoPerfil("CPF", "cd_cpf_doador", "text", 14),
     ];
 }
 
 $camposEndereco = [
-    "cep" => ["label" => "CEP", "coluna" => "cd_cep", "tipo" => "text", "max" => 9],
+    "cep" => new CampoPerfil("CEP", "cd_cep", "text", 9),
 ];
 $camposPerfil = array_merge($campos, $camposEndereco);
 
@@ -80,13 +80,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
             $quantidadeCaracteres = preg_match_all("/./us", $valor);
 
-            if ($valor === "" && empty($campo["opcional"])) {
+            if ($valor === "" && !$campo->opcional) {
                 $mensagem = "Este campo não pode ficar vazio.";
             } elseif ($quantidadeCaracteres === false) {
                 $mensagem = "O valor informado contém caracteres inválidos.";
-            } elseif (isset($campo["max"]) && $quantidadeCaracteres > $campo["max"]) {
+            } elseif ($campo->limite !== null && $quantidadeCaracteres > $campo->limite) {
                 $mensagem = "O valor informado é muito longo.";
-            } elseif ($campo["tipo"] === "email" && !filter_var($valor, FILTER_VALIDATE_EMAIL)) {
+            } elseif ($campo->tipo === "email" && !filter_var($valor, FILTER_VALIDATE_EMAIL)) {
                 $mensagem = "Informe um e-mail válido.";
             } else {
                 try {
@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         } else {
                             $conexao->beginTransaction();
                             $atualizacaoEndereco = $conexao->prepare(
-                                "UPDATE ENDERECO SET {$campo["coluna"]} = :valor
+                                "UPDATE ENDERECO SET {$campo->coluna} = :valor
                                  WHERE $colunaEnderecoDono = :id"
                             );
                             $atualizacaoEndereco->execute([
@@ -157,7 +157,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         }
                     } else {
                         $atualizacao = $conexao->prepare(
-                            "UPDATE $tabela SET {$campo["coluna"]} = :valor
+                            "UPDATE $tabela SET {$campo->coluna} = :valor
                              WHERE $colunaEmail = :email_atual"
                         );
                         $atualizacao->execute([
@@ -185,21 +185,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif ($acao === "atualizar_imagem") {
         $upload = salvarImagemCadastro($_FILES["imagem-perfil"] ?? null, true);
 
-        if (!$upload["sucesso"]) {
-            $mensagem = $upload["mensagem"];
+        if (!$upload->sucesso) {
+            $mensagem = $upload->mensagem;
         } else {
             try {
                 $atualizacao = $conexao->prepare(
                     "UPDATE $tabela SET $colunaImagem = :imagem WHERE $colunaEmail = :email"
                 );
                 $atualizacao->execute([
-                    ":imagem" => $upload["caminho"],
+                    ":imagem" => $upload->caminho,
                     ":email" => $emailSessao,
                 ]);
                 $mensagem = "Foto de perfil atualizada com sucesso.";
                 $sucesso = true;
             } catch (PDOException $erro) {
-                removerImagemCadastro($upload["arquivo"]);
+                removerImagemCadastro($upload->arquivo);
                 error_log("Erro ao atualizar foto de perfil: " . $erro->getMessage());
                 $mensagem = "Não foi possível atualizar a foto. Tente novamente.";
             }
@@ -332,7 +332,7 @@ function formatarDataDoacao(?string $data): string
 }
 
 $imagem = $perfil[$colunaImagem] ?: "resource/logo.jpeg";
-$nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
+$nome = $perfil[$campos["nome"]->coluna] ?? "Meu perfil";
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -403,15 +403,16 @@ $nome = $perfil[$campos["nome"]["coluna"]] ?? "Meu perfil";
                             <input type="hidden" name="acao" value="atualizar_campo">
                             <input type="hidden" name="campo" value="<?= escaparPerfil($chave) ?>">
                             <label class="profile-field-label" for="<?= escaparPerfil($id) ?>">
-                                <?= escaparPerfil($campo["label"]) ?>
+                                <?= escaparPerfil($campo->rotulo) ?>
                             </label>
 
-                            <?php if ($campo["tipo"] === "textarea"): ?>
-                                <textarea id="<?= escaparPerfil($id) ?>" name="valor" disabled required><?= escaparPerfil((string) ($perfil[$campo["coluna"]] ?? "")) ?></textarea>
+                            <?php if ($campo->tipo === "textarea"): ?>
+                                <textarea id="<?= escaparPerfil($id) ?>" name="valor" disabled required><?= escaparPerfil((string) ($perfil[$campo->coluna] ?? "")) ?></textarea>
                             <?php else: ?>
-                                <input id="<?= escaparPerfil($id) ?>" name="valor" type="<?= escaparPerfil($campo["tipo"]) ?>"
-                                    value="<?= escaparPerfil((string) ($perfil[$campo["coluna"]] ?? "")) ?>"
-                                    maxlength="<?= (int) $campo["max"] ?>" disabled <?= empty($campo["opcional"]) ? "required" : "" ?>>
+                                <input id="<?= escaparPerfil($id) ?>" name="valor" type="<?= escaparPerfil($campo->tipo) ?>"
+                                    value="<?= escaparPerfil((string) ($perfil[$campo->coluna] ?? "")) ?>"
+                                    <?php if ($campo->limite !== null): ?>maxlength="<?= $campo->limite ?>"<?php endif; ?>
+                                    disabled <?= $campo->opcional ? "" : "required" ?>>
                             <?php endif; ?>
 
                             <div class="profile-field-actions">

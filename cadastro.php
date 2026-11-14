@@ -25,9 +25,9 @@
           <p class="signup-subtitle">Cadastre-se como Doador ou ONG</p>
 
           <?php if ($resultado !== null): ?>
-            <p class="<?= $resultado['sucesso'] ? 'sucesso' : 'erro' ?>">
-              <?= htmlspecialchars($resultado['mensagem'], ENT_QUOTES, 'UTF-8') ?>
-              <?= $resultado['sucesso'] ? '(ID: ' . (int) $resultado['id'] . ')' : '' ?>
+            <p class="<?= $resultado->sucesso ? 'sucesso' : 'erro' ?>">
+              <?= htmlspecialchars($resultado->mensagem, ENT_QUOTES, 'UTF-8') ?>
+              <?= $resultado->sucesso ? '(ID: ' . (int) $resultado->id . ')' : '' ?>
             </p>
           <?php endif; ?>
 
