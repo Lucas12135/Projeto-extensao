@@ -12,12 +12,8 @@ session_start();
 require_once __DIR__ . "/../BD/conexao.php";
 require_once __DIR__ . "/../BD/criarTabelas.php";
 
-$adminEmail = getenv("REUNE_ADMIN_EMAIL");
-$adminPassword = getenv("REUNE_ADMIN_PASSWORD");
-$adminConfigured = is_string($adminEmail)
-    && filter_var($adminEmail, FILTER_VALIDATE_EMAIL) !== false
-    && is_string($adminPassword)
-    && strlen($adminPassword) >= 12;
+$adminEmail = "admin@reuneMais.com";
+$adminPassword = "reuneMais";
 
 if (!isset($_SESSION["token_admin"])) {
     $_SESSION["token_admin"] = bin2hex(random_bytes(32));
@@ -61,7 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $emailInformado = $_POST["email"] ?? "";
         $senhaInformada = $_POST["senha"] ?? "";
         if (
-            $adminConfigured &&
             is_string($emailInformado) &&
             is_string($senhaInformada) &&
             hash_equals($adminEmail, $emailInformado) &&
@@ -270,7 +265,7 @@ if ($autenticado) {
             "SELECT p.id_Doador, p.nm_doador, p.nm_email_doador, p.cd_telefone_doador,
                     COUNT(d.id_DOACAO) AS total_doacoes
              FROM DOADOR p
-             LEFT JOIN DOACAO d ON d.DOADOR_id_Doador = p.id_Doador
+             LEFT JOIN DOACAO d ON d.DOADOR_id_Doador = p.id_Doador WHERE p.nm_email_doador != 'admin@reuneMais.com'
              GROUP BY p.id_Doador, p.nm_doador, p.nm_email_doador, p.cd_telefone_doador
              ORDER BY p.nm_doador"
         );
@@ -286,7 +281,7 @@ if ($autenticado) {
     <meta name="robots" content="noindex, nofollow">
     <title>Painel administrativo - REUNE+</title>
     <link rel="icon" href="../resource/logo.jpeg" type="image/x-icon">
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../CSS/admin.css">
 </head>
 <body class="admin-page">
 <?php if (!$autenticado): ?>
@@ -296,13 +291,6 @@ if ($autenticado) {
             <p class="eyebrow">Área restrita</p>
             <h1>Painel administrativo</h1>
             <p class="muted">Entre com as credenciais de administração para continuar.</p>
-            <?php if (!$adminConfigured): ?>
-                <p class="notice notice-error" role="alert">
-                    O acesso administrativo ainda não foi configurado. Defina
-                    <code>REUNE_ADMIN_EMAIL</code> e <code>REUNE_ADMIN_PASSWORD</code>
-                    no ambiente do servidor; a senha deve ter pelo menos 12 caracteres.
-                </p>
-            <?php endif; ?>
             <?php if ($erro !== null): ?>
                 <p class="notice notice-error" role="alert"><?= $escape($erro) ?></p>
             <?php endif; ?>
@@ -313,7 +301,7 @@ if ($autenticado) {
                 <input id="email" name="email" type="email" autocomplete="username" required>
                 <label for="senha">Senha</label>
                 <input id="senha" name="senha" type="password" autocomplete="current-password" required>
-                <button class="button button-primary" type="submit" <?= !$adminConfigured ? "disabled" : "" ?>>Entrar</button>
+                <button class="button button-primary" type="submit">Entrar</button>
             </form>
             <a class="back-link" href="../index.php">Voltar ao site</a>
         </section>
@@ -562,5 +550,7 @@ if ($autenticado) {
         });
     </script>
 <?php endif; ?>
+<?php include __DIR__ . "/../PHP/acessibilidade.php"; ?>
+<script src="../JS/acessibilidade.js"></script>
 </body>
 </html>

@@ -19,6 +19,7 @@ if (!is_string($emailSessao) || $emailSessao === "") {
     header("Location: login.php");
     exit;
 }
+$isAdminDoador = !$isOng && strcasecmp($emailSessao, "admin@reuneMais.com") === 0;
 
 $tabela = $conta->tabela;
 $colunaId = $conta->colunaId;
@@ -460,6 +461,9 @@ $nome = $perfil[$campos["nome"]->coluna] ?? "Meu perfil";
                 </section>
 
                 <div class="profile-section-footer">
+                    <?php if ($isAdminDoador): ?>
+                        <a class="profile-admin-button" href="ADMIN/index.php">Painel ADMIN</a>
+                    <?php endif; ?>
                     <form class="profile-logout-form" method="POST" action="./PHP/logout.php">
                         <button type="submit" class="profile-logout-button">Sair da conta</button>
                     </form>

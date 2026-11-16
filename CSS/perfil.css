@@ -264,11 +264,36 @@
 
 .profile-section-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
   gap: 8px;
   margin-top: 28px;
   padding-top: 28px;
   border-top: 1px solid var(--line);
+}
+
+.profile-admin-button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  padding: 7px 13px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: var(--primary);
+  color: var(--card);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.profile-admin-button:hover {
+  background: var(--terciary);
+}
+
+.profile-admin-button:focus-visible {
+  outline: 3px solid rgba(var(--primary-rgb), 0.28);
+  outline-offset: 2px;
 }
 
 .profile-logout-button {
