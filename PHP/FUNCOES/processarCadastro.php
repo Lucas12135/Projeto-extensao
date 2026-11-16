@@ -10,6 +10,7 @@ require_once __DIR__ . "/cadastrarOng.php";
 require_once __DIR__ . "/cadastrarDoador.php";
 require_once __DIR__ . "/uploadImagem.php";
 require_once __DIR__ . "/validarDocumentos.php";
+require_once __DIR__ . "/validarCampos.php";
 
 require_once __DIR__ . "/../OBJETOS/DadosCadastroDoador.php";
 require_once __DIR__ . "/../OBJETOS/DadosCadastroOng.php";
@@ -65,6 +66,12 @@ function processarCadastro(PDO $conexao): ?ResultadoCadastro
         if (!validarCnpj($dados->cnpj)) {
             return ResultadoCadastro::falha('Informe um CNPJ válido.');
         }
+        if (!validarTelefone($dados->telefone)) {
+            return ResultadoCadastro::falha('Informe um telefone válido com DDD.');
+        }
+        if (!validarCep($dados->endereco->cep) || !validarUf($dados->endereco->uf)) {
+            return ResultadoCadastro::falha('Informe um CEP e uma UF válidos.');
+        }
         if ($dados->senha !== campo('confirmar-senha') || campo('agreement') === null) {
             return ResultadoCadastro::falha('Confirme a senha e aceite os termos.');
         }
@@ -110,6 +117,12 @@ function processarCadastro(PDO $conexao): ?ResultadoCadastro
 
     if (!validarCpf($dados->cpf)) {
         return ResultadoCadastro::falha('Informe um CPF válido.');
+    }
+    if (!validarTelefone($dados->telefone)) {
+        return ResultadoCadastro::falha('Informe um telefone válido com DDD.');
+    }
+    if (!validarCep($dados->endereco->cep) || !validarUf($dados->endereco->uf)) {
+        return ResultadoCadastro::falha('Informe um CEP e uma UF válidos.');
     }
     if ($dados->senha !== campo('confirmar-senha') || campo('agreement') === null) {
         return ResultadoCadastro::falha('Confirme a senha e aceite os termos.');

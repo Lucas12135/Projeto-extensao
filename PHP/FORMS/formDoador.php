@@ -18,7 +18,9 @@
         <div class="form-group">
             <label for="telefone-doador">Telefone</label>
             <input type="tel" id="telefone-doador" name="telefone-doador" placeholder="(11) 9XXXX-XXXX"
+                data-format="telefone" data-validation-status="telefone-status-doador"
                 oninput="formatarTelefoneDoador()" maxlength="18" required>
+            <small id="telefone-status-doador" aria-live="polite"></small>
         </div>
 
         <div class="form-group">
@@ -43,7 +45,9 @@
     <fieldset class="signup-step" id="doador-step-2" disabled hidden>
         <div class="form-group">
             <label for="cpf-doador">CPF</label>
-            <input type="text" id="cpf-doador" name="cpf-doador" placeholder="XXX.XXX.XXX-XX" oninput="formatarCPF(); verificarCPF()"
+            <input type="text" id="cpf-doador" name="cpf-doador" placeholder="XXX.XXX.XXX-XX"
+                data-format="cpf" data-validation-status="cpf-status-doador"
+                oninput="formatarCPF(); verificarCPF()"
                 maxlength="14" onblur="verificarCPF(true)" required>
             <small id="cpf-status-doador" aria-live="polite"></small>
         </div>
@@ -51,13 +55,15 @@
         <div class="form-group">
             <label for="cep-doador">CEP</label>
             <div class="cep-input-wrapper">
-                <input type="text" id="cep-doador" name="cep-doador" placeholder="00000-000" inputmode="numeric"
-                    autocomplete="postal-code" maxlength="9" required>
+                    <input type="text" id="cep-doador" name="cep-doador" placeholder="00000-000" inputmode="numeric"
+                        data-format="cep" data-validation-status="cep-validation-doador"
+                        autocomplete="postal-code" maxlength="9" required>
                 <button type="button" class="cep-info-button" data-cep-suffix="doador" aria-label="Ver informações do CEP">
                     +
                 </button>
             </div>
             <small id="cep-status-doador" aria-live="polite"></small>
+            <small id="cep-validation-doador" aria-live="polite"></small>
         </div>
 
         <div class="form-group">
@@ -73,8 +79,10 @@
 
             <div class="form-group">
                 <label for="uf-doador">UF</label>
-                <input type="text" id="uf-doador" name="uf-doador" placeholder="SP" maxlength="2" pattern="[A-Za-z]{2}"
+                <input type="text" id="uf-doador" name="uf-doador" placeholder="SP" data-format="uf"
+                    data-validation-status="uf-status-doador" maxlength="2" pattern="[A-Za-z]{2}"
                     title="Informe a sigla de dois caracteres do estado" autocomplete="address-level1" required>
+                <small id="uf-status-doador" aria-live="polite"></small>
             </div>
         </div>
 

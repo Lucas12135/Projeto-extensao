@@ -202,6 +202,10 @@
   font-weight: 500;
 }
 
+.profile-field input[type="hidden"] {
+  display: none;
+}
+
 .profile-field textarea {
   min-height: 72px;
   resize: vertical;
@@ -414,6 +418,87 @@
   font: inherit;
 }
 
+.profile-modal-input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.profile-validation-message {
+  display: block;
+  min-height: 1.1em;
+  margin-top: 5px;
+  color: var(--danger);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.profile-cep-input-wrapper {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.profile-cep-input-wrapper .profile-modal-input {
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-cep-toggle {
+  width: 48px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--field-background);
+  color: var(--primary);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profile-cep-toggle:hover {
+  background: var(--card);
+}
+
+.profile-cep-address-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.profile-cep-address-fields[hidden] {
+  display: none;
+}
+
+.profile-cep-address-fields > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.profile-cep-status.is-error {
+  color: var(--danger);
+}
+
+.profile-cep-status.is-success {
+  color: var(--success);
+}
+
+.profile-cep-status.is-loading {
+  color: var(--primary);
+}
+
+.profile-cep-address-field .profile-modal-label {
+  margin-bottom: 6px;
+}
+
+.profile-cep-address-field .profile-modal-input {
+  min-height: 42px;
+  padding: 9px 10px;
+}
+
 textarea.profile-modal-input {
   min-height: 130px;
   resize: vertical;
@@ -557,6 +642,10 @@ textarea.profile-modal-input {
   }
 
   .profile-info {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-cep-address-fields {
     grid-template-columns: 1fr;
   }
 }

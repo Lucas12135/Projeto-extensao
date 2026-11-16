@@ -96,7 +96,9 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
             <form class="contact-form">
               <input type="text" placeholder="Seu Nome" required>
               <input type="email" placeholder="Seu Email" required>
-              <input type="tel" placeholder="Seu Telefone" required>
+              <input id="contato-telefone" type="tel" placeholder="Seu Telefone" data-format="telefone"
+                data-validation-status="contato-telefone-status" required>
+              <small id="contato-telefone-status" aria-live="polite"></small>
               <textarea placeholder="Sua Mensagem" required></textarea>
               <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
             </form>
@@ -111,6 +113,8 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
   <footer>
     <p>© 2026 REUNE+. Juntos pela transformação social.</p>
   </footer>
+  <script src="JS/formatar.js"></script>
+  <script src="JS/verificacao.js"></script>
 </body>
 
 </html>

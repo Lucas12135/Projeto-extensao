@@ -24,6 +24,39 @@ $escape = static fn ($value): string => htmlspecialchars(
     ENT_QUOTES,
     "UTF-8"
 );
+$formatarTelefone = static function ($telefone): string {
+    $texto = (string) ($telefone ?? "");
+    $digitos = preg_replace('/\D/', '', $texto);
+    if (strlen($digitos) === 10) {
+        return sprintf(
+            "(%s) %s-%s",
+            substr($digitos, 0, 2),
+            substr($digitos, 2, 4),
+            substr($digitos, 6, 4)
+        );
+    }
+    if (strlen($digitos) === 11) {
+        return sprintf(
+            "(%s) %s-%s",
+            substr($digitos, 0, 2),
+            substr($digitos, 2, 5),
+            substr($digitos, 7, 4)
+        );
+    }
+    return $texto;
+};
+$formatarCnpj = static function ($cnpj): string {
+    $texto = (string) ($cnpj ?? "");
+    $digitos = preg_replace('/\D/', '', $texto);
+    if (strlen($digitos) !== 14) {
+        return $texto;
+    }
+    return preg_replace(
+        '/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/',
+        '$1.$2.$3/$4-$5',
+        $digitos
+    ) ?? $texto;
+};
 $tiposConta = [
     "ong" => [
         "tabela" => "ONG",
@@ -361,8 +394,8 @@ if ($autenticado) {
                                 <tr>
                                     <td><strong><?= $escape($ong["nm_ong"]) ?></strong></td>
                                     <td><?= $escape($ong["nm_email_ong"] ?: "—") ?></td>
-                                    <td><?= $escape($ong["cd_telefone_ong"] ?: "—") ?></td>
-                                    <td><?= $escape($ong["cd_cnpj"] ?: "—") ?></td>
+                                    <td><?= $escape($ong["cd_telefone_ong"] ? $formatarTelefone($ong["cd_telefone_ong"]) : "—") ?></td>
+                                    <td><?= $escape($ong["cd_cnpj"] ? $formatarCnpj($ong["cd_cnpj"]) : "—") ?></td>
                                     <td><?= (int) $ong["total_doacoes"] ?></td>
                                     <td>
                                         <button
@@ -397,7 +430,7 @@ if ($autenticado) {
                                 <tr>
                                     <td><strong><?= $escape($doador["nm_doador"]) ?></strong></td>
                                     <td><?= $escape($doador["nm_email_doador"] ?: "—") ?></td>
-                                    <td><?= $escape($doador["cd_telefone_doador"] ?: "—") ?></td>
+                                    <td><?= $escape($doador["cd_telefone_doador"] ? $formatarTelefone($doador["cd_telefone_doador"]) : "—") ?></td>
                                     <td><?= (int) $doador["total_doacoes"] ?></td>
                                     <td>
                                         <button

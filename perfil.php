@@ -4,6 +4,8 @@ require_once __DIR__ . "/BD/criarTabelas.php";
 require_once __DIR__ . "/PHP/FUNCOES/uploadImagem.php";
 require_once __DIR__ . "/PHP/OBJETOS/CampoPerfil.php";
 require_once __DIR__ . "/PHP/OBJETOS/TipoConta.php";
+require_once __DIR__ . "/PHP/FUNCOES/validarDocumentos.php";
+require_once __DIR__ . "/PHP/FUNCOES/validarCampos.php";
 
 use Reune\Objetos\CampoPerfil;
 use Reune\Objetos\TipoConta;
@@ -76,12 +78,84 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             $campo = $camposPerfil[$chaveCampo];
             $valor = trim($valor);
+            $dadosEndereco = null;
+            $localizacaoEndereco = null;
+            $erroEndereco = null;
+
+            if ($chaveCampo === "cep") {
+                if (!validarCep($valor)) {
+                    $erroEndereco = "Informe um CEP válido com 8 números.";
+                } else {
+                    $valor = preg_replace('/^(\d{5})-?(\d{3})$/', '$1-$2', $valor);
+                    $enderecoInformado = $_POST["endereco"] ?? null;
+                    $regrasEndereco = [
+                        "ds_logradouro" => ["limite" => 150, "opcional" => false],
+                        "nr_endereco" => ["limite" => 20, "opcional" => false],
+                        "ds_complemento" => ["limite" => 100, "opcional" => true],
+                        "nm_bairro" => ["limite" => 100, "opcional" => false],
+                        "nm_cidade" => ["limite" => 100, "opcional" => false],
+                        "sg_uf" => ["limite" => 2, "opcional" => false],
+                    ];
+
+                    if (!is_array($enderecoInformado)) {
+                        $erroEndereco = "Preencha os campos do endereço.";
+                    } else {
+                        $dadosEndereco = [];
+                        foreach ($regrasEndereco as $coluna => $regra) {
+                            $valorEndereco = $enderecoInformado[$coluna] ?? null;
+                            if (!is_string($valorEndereco)) {
+                                $erroEndereco = "Preencha corretamente os campos do endereço.";
+                                break;
+                            }
+
+                            $valorEndereco = trim($valorEndereco);
+                            if ($coluna === "sg_uf") {
+                                $valorEndereco = strtoupper($valorEndereco);
+                            }
+                            $caracteresEndereco = preg_match_all("/./us", $valorEndereco);
+
+                            if (
+                                $caracteresEndereco === false ||
+                                (!$regra["opcional"] && $valorEndereco === "") ||
+                                $caracteresEndereco > $regra["limite"] ||
+                                ($coluna === "sg_uf" && !validarUf($valorEndereco))
+                            ) {
+                                $erroEndereco = "Preencha corretamente os campos do endereço.";
+                                break;
+                            }
+                            $dadosEndereco[$coluna] = $valorEndereco;
+                        }
+
+                        if ($erroEndereco === null) {
+                            $localizacaoEndereco = implode(", ", array_filter(
+                                [
+                                    $dadosEndereco["ds_logradouro"],
+                                    $dadosEndereco["nr_endereco"],
+                                    $dadosEndereco["ds_complemento"],
+                                    $dadosEndereco["nm_bairro"],
+                                    $dadosEndereco["nm_cidade"],
+                                    $dadosEndereco["sg_uf"],
+                                    $valor,
+                                ],
+                                static fn($parte) => $parte !== ""
+                            ));
+                            $caracteresLocalizacao = preg_match_all("/./us", $localizacaoEndereco);
+                            if ($caracteresLocalizacao === false || $caracteresLocalizacao > 255) {
+                                $erroEndereco = "O endereço completo deve ter até 255 caracteres.";
+                            }
+                        }
+                    }
+                }
+            }
+
             if ($chaveCampo === "uf") {
                 $valor = strtoupper($valor);
             }
             $quantidadeCaracteres = preg_match_all("/./us", $valor);
 
-            if ($valor === "" && !$campo->opcional) {
+            if ($erroEndereco !== null) {
+                $mensagem = $erroEndereco;
+            } elseif ($valor === "" && !$campo->opcional) {
                 $mensagem = "Este campo não pode ficar vazio.";
             } elseif ($quantidadeCaracteres === false) {
                 $mensagem = "O valor informado contém caracteres inválidos.";
@@ -89,6 +163,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $mensagem = "O valor informado é muito longo.";
             } elseif ($campo->tipo === "email" && !filter_var($valor, FILTER_VALIDATE_EMAIL)) {
                 $mensagem = "Informe um e-mail válido.";
+            } elseif ($chaveCampo === "cpf" && !validarCpf($valor)) {
+                $mensagem = "Informe um CPF válido.";
+            } elseif ($chaveCampo === "cnpj" && !validarCnpj($valor)) {
+                $mensagem = "Informe um CNPJ válido.";
+            } elseif ($chaveCampo === "telefone" && !validarTelefone($valor)) {
+                $mensagem = "Informe um telefone válido com DDD.";
             } else {
                 try {
                     $emailEmUso = false;
@@ -124,31 +204,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         } else {
                             $conexao->beginTransaction();
                             $atualizacaoEndereco = $conexao->prepare(
-                                "UPDATE ENDERECO SET {$campo->coluna} = :valor
+                                "UPDATE ENDERECO
+                                 SET cd_cep = :cep, ds_logradouro = :logradouro,
+                                     nr_endereco = :numero, ds_complemento = :complemento,
+                                     nm_bairro = :bairro, nm_cidade = :cidade, sg_uf = :uf
                                  WHERE $colunaEnderecoDono = :id"
                             );
                             $atualizacaoEndereco->execute([
-                                ":valor" => $valor === "" ? null : $valor,
+                                ":cep" => $valor,
+                                ":logradouro" => $dadosEndereco["ds_logradouro"],
+                                ":numero" => $dadosEndereco["nr_endereco"],
+                                ":complemento" => $dadosEndereco["ds_complemento"] === ""
+                                    ? null
+                                    : $dadosEndereco["ds_complemento"],
+                                ":bairro" => $dadosEndereco["nm_bairro"],
+                                ":cidade" => $dadosEndereco["nm_cidade"],
+                                ":uf" => $dadosEndereco["sg_uf"],
                                 ":id" => $idPerfil,
                             ]);
 
-                            $consultaEndereco = $conexao->prepare(
-                                "SELECT ds_logradouro, nr_endereco, ds_complemento,
-                                        nm_bairro, nm_cidade, sg_uf, cd_cep
-                                 FROM ENDERECO WHERE $colunaEnderecoDono = :id"
-                            );
-                            $consultaEndereco->execute([":id" => $idPerfil]);
-                            $endereco = $consultaEndereco->fetch(PDO::FETCH_ASSOC);
-                            $localizacao = implode(", ", array_filter(
-                                $endereco,
-                                static fn($parte) => $parte !== null && $parte !== ""
-                            ));
                             $atualizacaoLocalizacao = $conexao->prepare(
                                 "UPDATE $tabela SET $colunaLocalizacao = :localizacao
                                  WHERE $colunaId = :id"
                             );
                             $atualizacaoLocalizacao->execute([
-                                ":localizacao" => $localizacao,
+                                ":localizacao" => $localizacaoEndereco,
                                 ":id" => $idPerfil,
                             ]);
                             $conexao->commit();
@@ -413,7 +493,14 @@ $nome = $perfil[$campos["nome"]->coluna] ?? "Meu perfil";
                                 <input id="<?= escaparPerfil($id) ?>" name="valor" type="<?= escaparPerfil($campo->tipo) ?>"
                                     value="<?= escaparPerfil((string) ($perfil[$campo->coluna] ?? "")) ?>"
                                     <?php if ($campo->limite !== null): ?>maxlength="<?= $campo->limite ?>"<?php endif; ?>
+                                    <?php if (in_array($chave, ["telefone", "cpf", "cnpj", "cep"], true)): ?>data-format="<?= escaparPerfil($chave) ?>"<?php endif; ?>
                                     disabled <?= $campo->opcional ? "" : "required" ?>>
+                            <?php endif; ?>
+                            <?php if ($chave === "cep"): ?>
+                                <?php foreach (["ds_logradouro", "nr_endereco", "ds_complemento", "nm_bairro", "nm_cidade", "sg_uf"] as $colunaEndereco): ?>
+                                    <input type="hidden" name="endereco[<?= escaparPerfil($colunaEndereco) ?>]"
+                                        value="<?= escaparPerfil((string) ($perfil[$colunaEndereco] ?? "")) ?>">
+                                <?php endforeach; ?>
                             <?php endif; ?>
 
                             <div class="profile-field-actions">
@@ -537,6 +624,8 @@ $nome = $perfil[$campos["nome"]->coluna] ?? "Meu perfil";
         <p>© 2026 REUNE+. Juntos pela transformação social.</p>
     </footer>
     <?php include_once __DIR__ . "/PHP/acessibilidade.php"; ?>
+    <script src="JS/formatar.js"></script>
+    <script src="JS/verificacao.js"></script>
     <script src="JS/perfil.js"></script>
 </body>
 

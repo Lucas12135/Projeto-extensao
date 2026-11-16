@@ -194,9 +194,14 @@
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
+.form-group input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
 .form-group small#cpf-status-doador,
 .form-group small#cnpj-status-ong,
-.form-group small.cep-status-erro {
+.form-group small.cep-status-erro,
+.form-group small.field-validation-error {
   color: #dc2626;
   font-size: 0.85rem;
 }
