@@ -51,7 +51,7 @@ try {
     }
 
     if ($resultado->status === ResultadoExclusaoConta::DOACOES_PENDENTES) {
-        $_SESSION['mensagem_perfil'] = 'Finalize todas as doações vinculadas antes de excluir sua conta.';
+        $_SESSION['mensagem_perfil'] = 'Finalize ou rejeite todas as doações vinculadas antes de excluir sua conta.';
         $_SESSION['sucesso_perfil'] = false;
         header('Location: ../perfil.php');
         exit;

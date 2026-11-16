@@ -391,7 +391,7 @@ $consultaDoacoes->execute([":email" => $emailSessao]);
 $doacoesPerfil = $consultaDoacoes->fetchAll(PDO::FETCH_ASSOC);
 $podeExcluirConta = true;
 foreach ($doacoesPerfil as $doacaoPerfil) {
-    if (($doacaoPerfil["nm_status_doacao"] ?? null) !== "Finalizada") {
+    if (!in_array($doacaoPerfil["nm_status_doacao"] ?? null, ["Finalizada", "Rejeitada"], true)) {
         $podeExcluirConta = false;
         break;
     }
@@ -562,7 +562,7 @@ $nome = $perfil[$campos["nome"]->coluna] ?? "Meu perfil";
                             </svg>
                         </button>
                         <?php if (!$podeExcluirConta): ?>
-                            <p class="profile-delete-notice" role="status">Finalize todas as doações vinculadas antes de excluir sua conta.</p>
+                            <p class="profile-delete-notice" role="status">Finalize ou rejeite todas as doações vinculadas antes de excluir sua conta.</p>
                         <?php endif; ?>
                     </form>
                 </div>
@@ -598,7 +598,7 @@ $nome = $perfil[$campos["nome"]->coluna] ?? "Meu perfil";
                 <h2 id="profile-delete-title">Excluir conta?</h2>
                 <button type="button" class="profile-modal-close" data-profile-modal-close aria-label="Fechar">&times;</button>
             </div>
-            <p>Esta ação é permanente. A conta, as doações finalizadas e as entregas vinculadas serão excluídas. Todas as doações precisam estar finalizadas para continuar.</p>
+            <p>Esta ação é permanente. A conta, as doações finalizadas ou rejeitadas e as entregas vinculadas serão excluídas. Todas as doações precisam estar finalizadas ou rejeitadas para continuar.</p>
             <label class="profile-modal-label" for="profile-delete-confirmation">
                 Digite <strong>CONFIRMAR</strong> para habilitar a exclusão
             </label>

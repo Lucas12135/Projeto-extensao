@@ -38,7 +38,7 @@ final class RepositorioExclusaoConta
         );
         $consultaDoacoes->execute([':id' => $idConta]);
         while (($status = $consultaDoacoes->fetchColumn()) !== false) {
-            if ($status !== 'Finalizada') {
+            if (!in_array($status, ['Finalizada', 'Rejeitada'], true)) {
                 $this->conexao->rollBack();
                 return new ResultadoExclusaoConta(ResultadoExclusaoConta::DOACOES_PENDENTES);
             }

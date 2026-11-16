@@ -7,16 +7,20 @@
   $emailDoador = '';
   $emailOng = '';
   $rememberLogin = false;
-  $updateRememberedLogin = static function ($email, $type): void {
+  $updateRememberedLogin = static function ($email, $type, bool $remember = true): void {
+    $expires = time() + 60 * 60 * 24 * 365;
     $cookieOptions = [
-      'expires' => $email === null ? time() - 3600 : time() + 60 * 60 * 24 * 365,
       'path' => '/',
       'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
       'httponly' => true,
       'samesite' => 'Lax',
     ];
-    setcookie('reune_remember_login_email', $email ?? '', $cookieOptions);
-    setcookie('reune_remember_login_type', $type ?? '', $cookieOptions);
+    setcookie('reune_remember_login_email', $email ?? '', $cookieOptions + [
+      'expires' => $email === null ? time() - 3600 : ($remember ? $expires : time() - 3600),
+    ]);
+    setcookie('reune_remember_login_type', $type ?? '', $cookieOptions + [
+      'expires' => $type === null ? time() - 3600 : ($remember ? $expires : 0),
+    ]);
   };
 
   if (
@@ -40,7 +44,7 @@
     $senhaOng = isset($_POST['senha-ong']) ? $_POST['senha-ong'] : null;
     $rememberLogin = isset($_POST['remember']);
     if (!$rememberLogin) {
-      $updateRememberedLogin(null, null);
+      $updateRememberedLogin(null, null, false);
     }
     
     if ($tipoLogin === 'doador') {
@@ -51,9 +55,11 @@
 
       if ($usuario && password_verify($senhaDoador, $usuario['pw_doador'])) {
         $_SESSION['email-doador'] = $usuario['nm_email_doador'];
-        if ($rememberLogin) {
-          $updateRememberedLogin($usuario['nm_email_doador'], 'doador');
-        }
+        $updateRememberedLogin(
+          $rememberLogin ? $usuario['nm_email_doador'] : null,
+          'doador',
+          $rememberLogin
+        );
         header("Location: index.php");
         exit;
       } else {
@@ -68,9 +74,11 @@
 
       if ($usuario && password_verify($senhaOng, $usuario['pw_ong'])) {
         $_SESSION['email-ong'] = $usuario['nm_email_ong'];
-        if ($rememberLogin) {
-          $updateRememberedLogin($usuario['nm_email_ong'], 'ong');
-        }
+        $updateRememberedLogin(
+          $rememberLogin ? $usuario['nm_email_ong'] : null,
+          'ong',
+          $rememberLogin
+        );
         header("Location: index.php");
         exit;
       } else {

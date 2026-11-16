@@ -71,7 +71,7 @@ $imagemPerfil = $img ?? 'resource/logo.jpeg';
           <h1>Uma plataforma digital para facilitar a doação.</h1>
           <p>O Reune+ é uma plataforma centralizadora que conecta doadores, voluntários e organizações beneficentes, tornando o processo de arrecadação e doação mais organizado, acessível e eficiente.</p>
           <div class="buttons">
-            <a class="btn btn-primary" href="login.php">Comece a ajudar</a>
+            <a class="btn btn-primary" href="<?= isset($_SESSION["email-doador"]) || isset($_SESSION["email-ong"]) ? "ongs.php" : "login.php" ?>">Comece a ajudar</a>
             <a class="btn btn-secondary" href="ongs.php">Conheça as ONGs parceiras</a>
           </div>
         </div>
